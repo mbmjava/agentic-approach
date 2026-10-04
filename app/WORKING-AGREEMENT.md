@@ -30,14 +30,14 @@ part of the product; [`AGENTS.md`](AGENTS.md) points here.
 ## Definition of done
 
 - Checks green: `node scripts/check-docs.mjs`, `node scripts/check-harness-parity.mjs`,
-  `node scripts/sync-agent-models.mjs --check`, `./mvnw test`, and the frontend `lint`/`test`/`build`.
+  `node scripts/sync-agent-models.mjs --check`, `./mvnw test`, and the frontend `lint`/`typecheck`/`test`/`build`.
 - Claims carry evidence and limits; no secret values anywhere.
 
 ## Verification
 
 - **Checks:** `node scripts/check-docs.mjs`; `node scripts/check-harness-parity.mjs`;
   `node scripts/sync-agent-models.mjs --check`.
-- **App:** `node scripts/worker-verify.mjs`; frontend `npm ci && npm run lint && npm run test && npm run build`.
+- **App:** `node scripts/worker-verify.mjs`; frontend `npm ci && npm run lint && npm run typecheck && npm run test && npm run build`.
 - **Never:** commit generated output, logs, or secrets.
 
 ## Cleanup
