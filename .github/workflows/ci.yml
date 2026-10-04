@@ -38,11 +38,11 @@ jobs:
           java-version: '21'
           distribution: temurin
           cache: maven
-      - name: Build and test
+      - name: Build, test, static analysis
         working-directory: app
         run: |
           chmod +x mvnw
-          ./mvnw -B test
+          ./mvnw -B verify
 
   # ----------------------------------------------------
   # STARTER: FRONTEND

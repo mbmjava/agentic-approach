@@ -58,6 +58,7 @@ from is a separate reference:
 - Docs and links: `node scripts/check-docs.mjs`
 - Harness consistency: `node scripts/check-harness-parity.mjs` and `node scripts/sync-agent-models.mjs --check`
 - Backend: `node scripts/worker-verify.mjs` (or `./mvnw test`)
+- Static analysis (report-first): `./mvnw verify` runs SpotBugs + FindSecBugs, PMD + CPD, and Checkstyle; see [`docs/standards/static-analysis.md`](docs/standards/static-analysis.md).
 - Frontend: `cd frontend && npm ci && npm run lint && npm run typecheck && npm run test && npm run build`
 
 ## Git and delegation

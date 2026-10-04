@@ -21,10 +21,10 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - name: Build and test
+      - name: Build, test, static analysis
         run: |
           chmod +x mvnw
-          ./mvnw -B test
+          ./mvnw -B verify
 
   frontend-test:
     name: Frontend Test (Node 20)
