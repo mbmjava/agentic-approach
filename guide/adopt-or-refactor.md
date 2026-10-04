@@ -83,6 +83,6 @@ Keep a before/after note for each change: the observed failure mode, the control
 
 ## Do not copy the example blindly
 
-The source project's two worker tiers, paid-model requirement, local container permissions, bounded Maven scripts, and one-wave handoff practice are adaptations to its models, Windows environment, build system, and shared dev stack. A new or existing project should keep the underlying intent—scoped work, reliable verification, clear ownership, and resumable context—while choosing controls that match its actual tools and risks.
+Tagwell's two Laguna worker tiers, paid-model requirement, local container permissions, bounded Maven scripts, and one-wave handoff practice are adaptations to its models, Windows environment, build system, and shared dev stack. A new or existing project should keep the underlying intent—scoped work, reliable verification, clear ownership, and resumable context—while choosing controls that match its actual tools and risks.
 
 For copy-ready instructions to give an LLM, see [LLM setup and refactor prompts](llm-setup-and-refactor.md). This playbook can be read-only reference material in the target project's session: have that LLM assess the target itself, propose a bounded plan, then apply only the items you approve. For what to copy versus install, see [Bring the playbook into a project](bring-playbook-to-project.md).

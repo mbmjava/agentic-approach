@@ -101,9 +101,9 @@ Use fewer roles than the task tempts you to invent. A worker should be different
 
 ## A repository-specific example
 
-The source project uses two fixed worker tiers: `worker` for implementation, critiques, and diagnosis; `worker-xs` for precise mechanical edits. Its root instructions require delegations to use those agents, prohibit worker Git writes, and keep model selection in each agent definition rather than relying on a per-dispatch override. The exact provider and model IDs are configuration choices, not part of the reusable pattern.
+Tagwell uses two fixed worker tiers: `worker` for implementation, critiques, and diagnosis; `worker-xs` for precise mechanical edits. Its root instructions require delegations to use those agents, prohibit worker Git writes, and keep model selection in each agent definition rather than relying on a per-dispatch override. The exact provider and model IDs are configuration choices, not part of the reusable pattern.
 
-The orchestrator keeps broad judgment tasks, final integration, and the verification gate. It can delegate diagnosis of a large evaluation report and request failure categories plus a minimal proposed fix, instead of spending its own context on raw logs. If the configured worker agents are unavailable, the source project's text-only CLI fallback returns a patch or explanation for the orchestrator to apply; it does not pretend to have changed files.
+The orchestrator keeps broad judgment tasks, final integration, and the verification gate. It can delegate diagnosis of a large evaluation report and request failure categories plus a minimal proposed fix, instead of spending its own context on raw logs. If the configured worker agents are unavailable, Tagwell's text-only CLI fallback returns a patch or explanation for the orchestrator to apply; it does not pretend to have changed files.
 
 These are local policies shaped by that repository. A different project may allow other worker agents or assign Git ownership differently, but it should still make those boundaries explicit.
 

@@ -61,7 +61,7 @@ The role, collaboration, cost, verification, and recovery principles are tool-ne
 - 2026-10-01 — Added the self-contained worker brief and "return findings only" rule; marked the guide as experience-derived.
 - 2026-10-01 — Added instructions for bringing the playbook (templates, patterns, assets) into a project.
 - 2026-10-02 — Added a working-agreement section and adopted one for this project; verified the Writerside build (0 errors).
-- 2026-10-02 — Clarified provenance: the guide extracts the real solutions used and being built in the source project (read-only), kept current as it evolves.
+- 2026-10-02 — Clarified provenance: the guide extracts the real solutions used and being built in Tagwell (read-only), kept current as it evolves.
 - 2026-10-02 — Added a "What this is" page as the document's start page.
 - 2026-10-04 — Added the operating loop (route-before-implement, delegate-whenever-safe, ordered queue, explicit stop conditions) and the "user is not the delegation trigger" rule.
 - 2026-10-04 — Added independent review (a swappable reviewer behind a stable contract).
@@ -69,5 +69,5 @@ The role, collaboration, cost, verification, and recovery principles are tool-ne
 - 2026-10-04 — Extended parity to skills, harness-set checks, and Claude worker shell enforcement via a PreToolUse hook.
 - 2026-10-04 — Added provider portability (GitHub vs GitLab) to independent review and the enforcement ladder.
 - 2026-10-04 — Adopted n8n as the provider-neutral advisory reviewer; added the GitLab adapter and a GitLab review workflow.
-- 2026-10-04 — Added CI "check silently didn't run" gotchas and advisor token permissions (from the review-flow bring-up).
+- 2026-10-04 — Added CI "check silently didn't run" gotchas and advisor token permissions (from the Tagwell PR-review bring-up).
 - 2026-10-04 — Moved the guide to GitHub-flavored Markdown in the `agentic-approach` repository, with a bundled harness and a blank Maven + React app. Dropped the Writerside instance and its sample topics; the TOC is now `guide/README.md`.

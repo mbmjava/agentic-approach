@@ -37,7 +37,7 @@ Until you have your own data, use broad token-share estimates rather than point 
 - Temporary observations stay in scratch notes or experiment logs until verified.
 - Remove or supersede stale guidance instead of maintaining competing versions; see [Prevent documentation bloat](documentation-bloat.md).
 
-The source project's in-well search evaluation is a useful example: a fixed corpus and repeated runs exposed model variance and distinguished missed file-search routes from vector-retrieval misses. Its scores and model names are dated observations, not promises about other codebases or future versions.
+Tagwell's in-well search evaluation is a useful example: a fixed corpus and repeated runs exposed model variance and distinguished missed file-search routes from vector-retrieval misses. Its scores and model names are dated observations, not promises about other codebases or future versions.
 
 ## Review the process itself
 

@@ -38,7 +38,7 @@ REPORT BACK:
 - uncertainty or blockers; stop rather than guess
 ```
 
-This mirrors the the source project assignment protocol: a specific goal, acceptance criteria, strict write scope, reference context, conventions, out-of-scope boundaries, and a concise diff-based report.
+This mirrors the Tagwell assignment protocol: a specific goal, acceptance criteria, strict write scope, reference context, conventions, out-of-scope boundaries, and a concise diff-based report.
 
 ### Make the brief self-contained, and return findings only
 
@@ -74,11 +74,11 @@ Workers should self-check within their permitted tools and report the exact comm
 
 Self-verification is useful evidence, not a substitute for the integration gate. Report checks that were not run as **not verified**.
 
-In the the source project example, workers may use only repository wrappers such as `node scripts/worker-verify.mjs <module> [TestClass]`, documentation checks, and the bounded integration-test runner. The orchestrator serializes build/evaluation work because build output and ports are shared, checks `git status` after each worker pass, and rejects files outside the assignment. Adapt those exact commands to the target repository rather than copying them literally.
+In the Tagwell example, workers may use only repository wrappers such as `node scripts/worker-verify.mjs <module> [TestClass]`, documentation checks, and the bounded integration-test runner. The orchestrator serializes build/evaluation work because build output and ports are shared, checks `git status` after each worker pass, and rejects files outside the assignment. Adapt those exact commands to the target repository rather than copying them literally.
 
 ## Bound expensive or risky operations
 
-Prefer repository scripts that enforce timeouts, log paths, cleanup, and reliable exit status over ad hoc foreground commands. The source project's `worker-verify.mjs`, `run-it.mjs`, and `app-start.mjs` are examples of wrappers built around observed hangs and shared-resource collisions.
+Prefer repository scripts that enforce timeouts, log paths, cleanup, and reliable exit status over ad hoc foreground commands. Tagwell's `worker-verify.mjs`, `run-it.mjs`, and `app-start.mjs` are examples of wrappers built around observed hangs and shared-resource collisions.
 
 Never call an operation safe simply because a script wraps it. Keep production, remote, destructive, and shared-environment actions behind explicit authorization and clear scope.
 

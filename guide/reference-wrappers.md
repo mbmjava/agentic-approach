@@ -1,6 +1,6 @@
 # Reference wrappers
 
-A **wrapper** is a small script that makes a slow, hanging, or hard-to-interpret operation safe to run from an agent: bounded in time, observable, and honest about success. This topic is a **specification, not code**. A consuming agent should implement each wrapper in the target project's own stack (language, build tool, OS) and satisfy the contract here. The source project's `scripts/*.mjs` are one implementation to adapt, not to copy.
+A **wrapper** is a small script that makes a slow, hanging, or hard-to-interpret operation safe to run from an agent: bounded in time, observable, and honest about success. This topic is a **specification, not code**. A consuming agent should implement each wrapper in the target project's own stack (language, build tool, OS) and satisfy the contract here. Tagwell's `scripts/*.mjs` are one implementation to adapt, not to copy.
 
 Use it with the [bootstrap checklist](bootstrap-checklist.md): add wrappers only where a real operation is slow, hanging, or ambiguous.
 

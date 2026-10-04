@@ -99,7 +99,7 @@ Fix the highest-risk issue first, verify the control in the real environment, th
 
 ## Use this playbook from the target project
 
-This repository (`agentic-approach`) is the **source playbook**. The target project's coding-agent session should read the relevant topics as external reference, inspect the target repository's current state, and adapt the recommendations. Do not treat examples from the source projects (such as the source project) as the target policy unless they fit and are explicitly adopted. For the mechanics—reference, copy, or install—see [Bring the playbook into a project](bring-playbook-to-project.md).
+This repository (`agentic-approach`) is the **source playbook**. The target project's coding-agent session should read the relevant topics as external reference, inspect the target repository's current state, and adapt the recommendations. Do not treat Tagwell's implementation examples as the target policy unless they fit and are explicitly adopted. For the mechanics—reference, copy, or install—see [Bring the playbook into a project](bring-playbook-to-project.md).
 
 For a refactor, start a coding-agent session from the target repository. Point it at this guide (a local clone or the repository URL) and use a prompt like this:
 

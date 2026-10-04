@@ -80,9 +80,9 @@ Deletion is how a codebase and doc set stay usable. If a repo only grows, every 
 
 Cleanup is an ideal worker task: low judgment, an exact file list, and a check that proves nothing broke. Delegate it, serialize the checks, and let the orchestrator own the final diff and commit.
 
-## A worked mapping (the source project example)
+## A worked mapping (Tagwell example)
 
-The source project states strong rules in its instructions and CI covers part of them. Mapping rules to levels exposes the gaps—treat this as an example, not a critique to copy:
+Tagwell states strong rules in its instructions and CI covers part of them. Mapping rules to levels exposes the gaps—treat this as an example, not a critique to copy:
 
 | Rule | Started as | Enforced by | Gap |
 | --- | --- | --- | --- |

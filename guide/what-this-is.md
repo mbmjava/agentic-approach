@@ -1,11 +1,11 @@
 # What this is
 
-A living playbook for agentic coding. It **extracts the real solutions and approaches used and being built in the source project as we work**—not compiled from other guides, and not aspirational filler.
+A living playbook for agentic coding. It **extracts the real solutions and approaches used and being built in Tagwell as we work**—not compiled from other guides, and not aspirational filler.
 
 ## Purpose and source
 
 - **Purpose:** capture what actually works in real projects and make it reusable when starting or refactoring a project.
-- **Source of truth:** the source project is the living source and stays read-only. Durable, tested lessons are distilled here as they appear, so the guide follows the practice—not the other way around.
+- **Source of truth:** Tagwell is the living source and stays read-only. Durable, tested lessons are distilled here as they appear, so the guide follows the practice—not the other way around.
 - **Audience:** developers setting up or refactoring an agentic-coding workflow; agents that read the guide as reference; projects that copy its templates or install its patterns.
 
 ## What it is not

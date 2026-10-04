@@ -26,7 +26,7 @@ Treat these ranges as a starting assumption for planning. After several represen
 
 ## Illustrative OpenRouter cost example
 
-The following shows how the split could affect API cost for a large project. The prices below match OpenRouter's endpoint listings checked on **2026-10-01** for the specified routes; verify live rates before using the numbers for a budget. The token volumes are **illustrative envelopes**, not measured the source project telemetry.
+The following shows how the split could affect API cost for a large project. The prices below match OpenRouter's endpoint listings checked on **2026-10-01** for the specified routes; verify live rates before using the numbers for a budget. The token volumes are **illustrative envelopes**, not measured Tagwell telemetry.
 
 | Model role | Model | Input / output price per 1M tokens |
 | --- | --- | ---: |

@@ -15,13 +15,13 @@ Do not make a handoff the only home for a lasting decision or known issue. Hando
 
 Keep this lightweight: a one-file fix usually needs no plan or handoff. Capture context when there is enough state, rationale, or pending work that a fresh session would otherwise repeat meaningful investigation.
 
-The source project's concrete split is `docs/` for reviewed, durable knowledge and `working-docs/` for plans, handoffs, and current work state. Its handoff is a snapshot; the plan is kept resumable. That split is one good implementation, not a required directory naming scheme.
+Tagwell's concrete split is `docs/` for reviewed, durable knowledge and `working-docs/` for plans, handoffs, and current work state. Its handoff is a snapshot; the plan is kept resumable. That split is one good implementation, not a required directory naming scheme.
 
-The distinction matters during a crash: a handoff is mainly a planned checkpoint, while the living plan must stay current enough to recover if the session stops before a handoff is prepared. The source project's practice of updating the plan with the latest outcome, relevant evidence, blocker, and next action before proceeding helps limit how much state can be lost.
+The distinction matters during a crash: a handoff is mainly a planned checkpoint, while the living plan must stay current enough to recover if the session stops before a handoff is prepared. Tagwell's practice of updating the plan with the latest outcome, relevant evidence, blocker, and next action before proceeding helps limit how much state can be lost.
 
 ## Keep a simple documentation lifecycle
 
-The source project adds several useful practices around that split. Adapt the directory names and ceremony to the project, but keep the underlying sources of truth distinct:
+Tagwell adds several useful practices around that split. Adapt the directory names and ceremony to the project, but keep the underlying sources of truth distinct:
 
 | Document | Purpose | Keep it current by |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ The source project adds several useful practices around that split. Adapt the di
 | Decision record | Rationale and consequences of a hard-to-reverse choice | Write it when the choice is made; do not leave the decision only in a plan or chat. |
 | Known-issues register | Accepted limitations and deferred work that outlive the current task | Track them durably with an owner or trigger; do not rely on a refreshed handoff to preserve them. |
 
-The source project also uses a documentation index to find canonical pages and templates for plans, handoffs, and decisions. For governed Markdown, it requires a small frontmatter schema (`title`, `type`, `status`, `owner`, `last_updated`, with optional `tags`) and checks that metadata and relative links resolve in a script/CI. Stale copies are removed or pointed to their replacement rather than left as competing guidance. These are lightweight ways to keep a developer's working memory trustworthy; adopt them when the docs volume justifies the small maintenance cost.
+Tagwell also uses a documentation index to find canonical pages and templates for plans, handoffs, and decisions. For governed Markdown, it requires a small frontmatter schema (`title`, `type`, `status`, `owner`, `last_updated`, with optional `tags`) and checks that metadata and relative links resolve in a script/CI. Stale copies are removed or pointed to their replacement rather than left as competing guidance. These are lightweight ways to keep a developer's working memory trustworthy; adopt them when the docs volume justifies the small maintenance cost.
 
 Copy-ready skeletons for the plan, handoff, decision record, and known-issues entry are in [Reusable templates](templates.md).
 
@@ -77,6 +77,6 @@ The rationale matters because a new session otherwise spends time re-deriving in
 
 Close or refresh a handoff at a milestone, before a deliberate context reset, when a session stalls, or when the current context has become difficult to navigate. A time limit can be a useful local reminder, but it is not a universal measure of context quality.
 
-The source project additionally uses a local “answer before act” rule: a question or observation is not automatically a work order. In a general workflow, preserve the same intent by distinguishing an explicit request from a discussion, and ask before expanding ambiguous scope or crossing an agreed risk boundary.
+Tagwell additionally uses a local “answer before act” rule: a question or observation is not automatically a work order. In a general workflow, preserve the same intent by distinguishing an explicit request from a discussion, and ask before expanding ambiguous scope or crossing an agreed risk boundary.
 
 If the next step depends on a human decision, stop at that decision. Record the evidence and alternatives, then ask; do not keep editing or running expensive evaluations just to maintain momentum.
