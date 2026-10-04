@@ -44,7 +44,7 @@ from is a separate reference:
 
 | Path | What it is |
 | --- | --- |
-| `src/`, `pom.xml` | the Spring Boot API |
+| `src/`, `pom.xml` | the Spring Boot API — one hexagonal feature per package (`domain/` → `application/` → `adapter/`) |
 | `frontend/` | the Vite + React app |
 | `.opencode/`, `.claude/`, `CLAUDE.md` | the agent harness for both CLIs |
 | `scripts/` | verification and hygiene wrappers |

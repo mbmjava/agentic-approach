@@ -2,7 +2,7 @@
 title: Review checklist
 type: standard
 status: active
-owner: Mike
+owner: mbmjava
 last_updated: 2026-10-04
 tags: [process, review, quality]
 ---
@@ -34,7 +34,7 @@ Output contract (from any reviewer): `VERDICT: approve | request-changes | comme
 ## Scope and contracts
 - The diff stays within the declared file scope; no unrelated edits.
 - Shared contracts (interfaces, records, wire shapes, module boundaries) are respected or changed deliberately.
-- Spring Modulith boundaries and hexagonal layout hold.
+- Hexagonal layout holds: dependencies point inward (`adapter -> application -> domain`) and the domain has no framework or infrastructure imports.
 
 ## Simplicity and anti-slop
 - No dead code, unused deps, speculative abstractions, or needless new dependencies.
@@ -43,7 +43,7 @@ Output contract (from any reviewer): `VERDICT: approve | request-changes | comme
 
 ## Harness and infrastructure (owner review required)
 - Changes to `AGENTS.md`, `.opencode/**`, `.github/**`, `scripts/check-docs.mjs`,
-  `scripts/docs-report.mjs`, `pom.xml`, or `CLAUDE.md` are flagged for Mike's review — the harness is
+  `scripts/docs-report.mjs`, `pom.xml`, or `CLAUDE.md` are flagged for owner review — the harness is
   code under change control.
 - Bounded wrappers keep their contract (timeout, process-tree cleanup, honest exit status).
 
