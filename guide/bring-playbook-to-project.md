@@ -73,6 +73,6 @@ If you want a hosted site, generate it from the same Markdown with a static-site
 
 ## Use this repository as a starting point
 
-This repository is itself a ready-to-use template: the harness (`.opencode/`, `.claude/`, `scripts/`, `.github/`, `tools/`) and a blank Maven + React app under `app/` are wired together and verified. Start a new project with **Use this template**, or copy only the parts you will maintain.
+The `app/` directory is a complete, self-contained starter: the harness (`.opencode/`, `.claude/`, `scripts/`, `docs/`, `working-docs/`, `tools/`, `.github/`) and a blank Maven + React app, wired and verified together. Copy `app/` into a new project — or use this repository as a template — and you get the workflow, checks, and CI already in place; this playbook is the reference it points back to.
 
 See [Use the playbook from the target project](llm-setup-and-refactor.md) for the read-only access rules.

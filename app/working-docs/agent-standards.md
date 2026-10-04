@@ -23,7 +23,7 @@ delete anything that stops earning its place.
 - **One wave per session.** At the first stall or a clean milestone, refresh `working-docs/handoff.md`
   and start a fresh session from it.
 - **Bounded wrappers, never foreground long-runners.** A server or build can hang forever; use a wrapper
-  with a hard timeout and an announced log path. See [reference wrappers](../guide/reference-wrappers.md).
+  with a hard timeout and an announced log path. See [reference wrappers](https://github.com/mbmjava/agentic-approach/blob/main/guide/reference-wrappers.md).
 - **Visible narration every turn.** Announce each multi-minute step and its result.
 - **Secrets are runtime-only.** Never inline credentials; never commit `.env.local`.
 - **Never claim to see an image.** Delegate visual inspection to a bounded capture + review step.
@@ -45,7 +45,7 @@ Keep the ordered `Next` queue and the explicit stop conditions.
   cross-cutting decisions with the user.
 - A **worker** gets a self-contained brief (goal, acceptance criteria, strict write scope, references,
   out-of-scope boundaries). It returns findings and a diff only, does not message the user, and never
-  writes git. See [delegate safely](../guide/delegate-safely.md) and the `worker` skill.
+  writes git. See [delegate safely](https://github.com/mbmjava/agentic-approach/blob/main/guide/delegate-safely.md) and the `worker` skill.
 - Serialize build/verification work: build output, ports, and caches are shared.
 
 ## 4. Verification

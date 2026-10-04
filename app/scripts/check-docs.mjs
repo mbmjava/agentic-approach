@@ -8,13 +8,13 @@
 //   node scripts/check-docs.mjs
 //
 // Governed set (frontmatter required): docs/**/*.md and working-docs/**/*.md.
-// Link-checked set: guide/**, docs/**, working-docs/**.
+// Link-checked set: docs/**, working-docs/**.
 // Exempt from frontmatter: docs/standards/templates/**, working-docs/observability/**.
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, resolve, sep } from 'node:path';
 
 const FM_ROOTS = ['docs', 'working-docs'];
-const LINK_ROOTS = ['guide', 'docs', 'working-docs'];
+const LINK_ROOTS = ['docs', 'working-docs'];
 const TYPES = new Set(['standard', 'architecture', 'requirement', 'decision', 'product',
   'runbook', 'plan', 'handoff', 'index']);
 const STATUSES = new Set(['draft', 'active', 'stable', 'superseded']);
@@ -101,7 +101,7 @@ for (const root of LINK_ROOTS) {
   for (const file of walk(root)) {
     const posix = toPosix(file);
     if (!inRoots(posix, FM_ROOTS) || exemptFm(posix)) {
-      // still link-check guide/ and exempt files
+      // still link-check exempt files
       checkLinks(readFileSync(file, 'utf8'), posix, errors);
       continue;
     }

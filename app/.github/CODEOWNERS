@@ -14,7 +14,7 @@
 /.github/             @mbmjava
 /scripts/             @mbmjava
 /pom.xml              @mbmjava
-/app/pom.xml          @mbmjava
+/frontend/            @mbmjava
 /docs/standards/      @mbmjava
 /tools/               @mbmjava
 

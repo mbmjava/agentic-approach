@@ -1,11 +1,10 @@
 # Agentic Approach
 
-A living playbook for agentic coding — plus a ready-to-use agent harness and a blank Maven + React app
-you can start a real project from.
+A living playbook for agentic coding, plus a ready-to-use starter you can build a real project from.
 
-The playbook extracts what actually works in real projects, generalizes it, and ships the reusable parts,
-so a new project starts with the workflow, agents, checks, and CI already wired instead of assembling them
-by hand.
+The playbook (`guide/`) extracts what actually works in real projects, generalizes it, and points at a
+complete starter (`app/`) that already has the workflow, agents, checks, and CI wired — so you start
+from a working setup instead of assembling one by hand.
 
 ## Start here
 
@@ -14,7 +13,8 @@ by hand.
 - **Setting up a project:** [Bootstrap checklist](guide/bootstrap-checklist.md),
   [working agreement](guide/working-agreement.md), [template](guide/agentic-coding-template.md), and an
   adapter ([OpenCode](guide/configure-opencode.md) or [Claude Code](guide/claude-code-setup.md)).
-- **Starting from this repo:** click **Use this template**, or copy `app/` and the harness you want. See
+- **Starting from this repo:** copy the **`app/`** directory into your project (or use this repo as a
+  template) — it carries the harness, docs, templates, and CI. See
   [Bring the playbook into a project](guide/bring-playbook-to-project.md).
 - **Full topic index:** [guide/README.md](guide/README.md).
 
@@ -23,19 +23,15 @@ by hand.
 | Path | What it is |
 | --- | --- |
 | `guide/` | the playbook — plain GitHub-flavored Markdown with relative links |
-| `app/` | a blank Maven + React app with the harness already wired and verified |
-| `.opencode/`, `.claude/`, `CLAUDE.md` | the agent harness for both CLIs (shared bodies, per-CLI frontmatter) |
-| `scripts/` | verification and hygiene scripts (docs, links, harness parity, model sync, wrappers) |
-| `docs/` | standards, reusable templates, and the known-issues register |
-| `working-docs/` | agent standards, the current handoff, plans, and the wave log |
-| `tools/` | the PR-review flow (provider-native gate + n8n advisor) |
-| `.github/` | CI, the PR template, and CODEOWNERS |
+| `app/` | the complete, self-contained starter: a blank Maven + React app plus its harness (`.opencode/`, `.claude/`, `scripts/`, `docs/`, `working-docs/`, `tools/`, `.github/`) and its own `AGENTS.md` |
+| `scripts/` | repo-level checks for the playbook (link check) |
+| `.github/` | CI for this repo (guide links + the starter's checks) |
 
 ## How the guide stays real
 
 Every claim is either a tested lesson or is labelled with its limits (dated estimates, prices, results).
-The playbook follows the practice, not the other way around. See [What this is](guide/what-this-is.md) and
-the [working agreement](guide/working-agreement.md).
+The playbook follows the practice, not the other way around. See [What this is](guide/what-this-is.md)
+and the [working agreement](guide/working-agreement.md).
 
 ## Status and limits
 

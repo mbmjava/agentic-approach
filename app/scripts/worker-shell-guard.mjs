@@ -31,7 +31,7 @@ const cmd = command.trim();
 
 const block = (why) => {
   process.stderr.write(`Blocked by worker-shell-guard (${tier}): ${why}\n` +
-    `Allowed: the bounded wrappers (worker-verify/check-docs/code-map${tier === 'worker' ? '/run-it' : ''}) ` +
+    `Allowed: the bounded wrappers (check-docs${tier === 'worker' ? '/worker-verify' : ''}) ` +
     `and read-only git (status/diff/log). One simple command, exactly as written.\n`);
   process.exit(2);
 };
@@ -41,12 +41,10 @@ if (/[;&|`\n]|\$\(/.test(cmd)) block(`compound or piped command not allowed: '${
 
 const allowed = [
   /^node\s+scripts\/check-docs\.mjs\b/,
-  /^node\s+scripts\/code-map\.mjs\b/,
   /^git\s+(status|diff|log)\b/,
 ];
 if (tier === 'worker') {
   allowed.push(/^node\s+scripts\/worker-verify\.mjs\b/);
-  allowed.push(/^node\s+scripts\/run-it\.mjs\b/);
 }
 
 if (allowed.some((re) => re.test(cmd))) process.exit(0);
