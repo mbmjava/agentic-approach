@@ -67,7 +67,7 @@ Deletion is how a codebase and doc set stay usable. If a repo only grows, every 
 
 ### Detect, prevent, schedule
 
-- **Detect.** Add lightweight signals: unused-code and unused-dependency analysis where the toolchain supports it; a staleness report from doc `last_updated`; an orphaned-page check; a generated-map freshness check. Do not hand-detective what a tool can flag.
+- **Detect.** Add lightweight signals, all **report-first**: static analysis for bugs, security, and dead code (surface findings without failing the build, then promote only the rules with a real hit rate); unused-code and unused-dependency analysis where the toolchain supports it; a staleness report from doc `last_updated`; an orphaned-page check; a generated-map freshness check. Do not hand-detective what a tool can flag.
 - **Prevent.** No new doc without a reason; supersede instead of stacking; delete stale rather than paraphrase; prefer generators over hand-maintained output.
 - **Schedule.** Reserve a bounded cleanup slice on a cadence, or run a cleanup checklist before a milestone. Keep each slice independently green and commit it—never leave the repo half-cleaned.
 
