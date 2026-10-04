@@ -1,0 +1,13 @@
+{
+  "models": {
+    "worker": { "opencode": "openrouter/poolside/laguna-s-2.1", "claude": "haiku" },
+    "worker-xs": { "opencode": "openrouter/poolside/laguna-xs-2.1", "claude": "haiku" },
+    "reviewer": { "opencode": "openrouter/openai/gpt-6-luna", "claude": "sonnet" }
+  },
+  "agents": {
+    "worker": "worker",
+    "worker-xs": "worker-xs",
+    "architecture-reviewer": "reviewer",
+    "pr-reviewer": "reviewer"
+  }
+}

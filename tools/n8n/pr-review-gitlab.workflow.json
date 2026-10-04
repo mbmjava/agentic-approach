@@ -1,0 +1,177 @@
+{
+  "name": "MR review (polling) — GitLab variant",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## GitLab MR review (starting point)\n\nSame advisor as the GitHub variant, with GitLab nodes swapped in. Polling, because a local n8n can't receive GitLab webhooks.\n\nFlow: Schedule -> List open MRs -> Get MR changes -> Build diff -> Prepare request -> **Review** -> Post review note.\n\n`PROJECT_ID` = the URL-encoded path (e.g. `group%2Fproject`) or the numeric id. `PRIVATE-TOKEN` header-auth credential. Swap point = the *Review* node (agent today, human later).\n\nSelf-hosted GitLab: replace https://gitlab.com with your host.",
+        "height": 300,
+        "width": 420
+      },
+      "id": "sticky-g1",
+      "name": "Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -320]
+    },
+    {
+      "parameters": {
+        "rule": { "interval": [ { "field": "minutes", "minutesInterval": 15 } ] }
+      },
+      "id": "schedule-g1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://gitlab.com/api/v4/projects/PROJECT_ID/merge_requests",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "state", "value": "opened" },
+            { "name": "order_by", "value": "updated_at" },
+            { "name": "sort", "value": "desc" },
+            { "name": "per_page", "value": "20" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "gl-list-1",
+      "name": "List open MRs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REPLACE_GITLAB_CRED_ID", "name": "GitLab" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Skip MRs already reviewed at their current head sha (workflow static data).\nconst store = $getWorkflowStaticData('global');\nconst reviewed = store.reviewed || {};\nconst out = [];\nfor (const item of $input.all()) {\n  const mr = item.json;\n  const key = String(mr.iid);\n  if (reviewed[key] === mr.sha) continue;\n  out.push({ json: mr });\n}\nreturn out;"
+      },
+      "id": "gl-dedup-1",
+      "name": "Dedup (skip reviewed sha)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [330, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://gitlab.com/api/v4/projects/PROJECT_ID/merge_requests/{{ $json.iid }}/changes",
+        "options": {}
+      },
+      "id": "gl-changes-1",
+      "name": "Get MR changes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 0],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REPLACE_GITLAB_CRED_ID", "name": "GitLab" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const mr = $input.first().json;\nconst changes = mr.changes || [];\nlet diff = '';\nfor (const c of changes) {\n  diff += 'diff --git a/' + (c.old_path || c.new_path) + ' b/' + c.new_path + '\\n' + (c.diff || '') + '\\n';\n}\nreturn [{ json: { iid: mr.iid, diff: diff.slice(0, 120000) } }];"
+      },
+      "id": "gl-code-1",
+      "name": "Build diff",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "body",
+              "name": "body",
+              "type": "string",
+              "value": "={{ JSON.stringify({ model: 'openai/gpt-6-luna', messages: [ { role: 'system', content: 'You are an independent, read-only MR reviewer. Review the diff against this checklist: correctness and intent; tests and evidence; docs updated in the same commit; scope and contracts; simplicity and anti-slop (no dead code, unused deps, speculative abstraction); harness changes (flag AGENTS.md, .opencode/**, .claude/**, .github/**, .gitlab-ci.yml, scripts/*, pom.xml, CLAUDE.md); boundaries (no credentials). Cite path:line; separate verified from inference. Do not approve or merge. Output: first line VERDICT: approve | request-changes | comment; then CHECKLIST: item=pass|fail|n-a; then FINDINGS: - [severity] path:line - problem / fix.' }, { role: 'user', content: 'Diff: ' + $json.diff } ] }) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "gl-set-1",
+      "name": "Prepare request",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [880, 0]
+    },
+    {
+      "parameters": {
+        "content": "## SWAP POINT\nReplace this node with a human step (email/Slack/MR review request) returning the same VERDICT/CHECKLIST/FINDINGS contract.",
+        "height": 200,
+        "width": 320
+      },
+      "id": "sticky-g2",
+      "name": "Swap note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1020, -240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "gl-review-1",
+      "name": "Review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 0],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REPLACE_OPENROUTER_CRED_ID", "name": "OpenRouter" }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://gitlab.com/api/v4/projects/PROJECT_ID/merge_requests/{{ $('List open MRs').item.json.iid }}/notes",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ body: $json.choices[0].message.content }) }}",
+        "options": {}
+      },
+      "id": "gl-note-1",
+      "name": "Post review note",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, 0],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REPLACE_GITLAB_CRED_ID", "name": "GitLab" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Record the reviewed head sha so the next run skips it.\nconst store = $getWorkflowStaticData('global');\nstore.reviewed = store.reviewed || {};\nfor (const item of $input.all()) {\n  const mr = $('List open MRs').item.json;\n  store.reviewed[String(mr.iid)] = mr.sha;\n}\nreturn $input.all();"
+      },
+      "id": "gl-mark-1",
+      "name": "Mark reviewed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, 0]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "List open MRs", "type": "main", "index": 0 }]] },
+    "List open MRs": { "main": [[{ "node": "Dedup (skip reviewed sha)", "type": "main", "index": 0 }]] },
+    "Dedup (skip reviewed sha)": { "main": [[{ "node": "Get MR changes", "type": "main", "index": 0 }]] },
+    "Get MR changes": { "main": [[{ "node": "Build diff", "type": "main", "index": 0 }]] },
+    "Build diff": { "main": [[{ "node": "Prepare request", "type": "main", "index": 0 }]] },
+    "Prepare request": { "main": [[{ "node": "Review", "type": "main", "index": 0 }]] },
+    "Review": { "main": [[{ "node": "Post review note", "type": "main", "index": 0 }]] },
+    "Post review note": { "main": [[{ "node": "Mark reviewed", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false,
+  "pinData": {}
+}

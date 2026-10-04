@@ -1,0 +1,22 @@
+# CODEOWNERS — who must review what.
+#
+# This is the HUMAN review channel and the swap point for the review flow: today the owner
+# reviews these paths; when a second developer joins, move a path to their handle and the flow
+# is unchanged.
+#
+# Replace `@mbmjava` with the GitHub handle that owns harness/infra review.
+
+# Harness + infrastructure: the agent workflow is code under change control.
+/AGENTS.md            @mbmjava
+/CLAUDE.md            @mbmjava
+/.opencode/           @mbmjava
+/.claude/             @mbmjava
+/.github/             @mbmjava
+/scripts/             @mbmjava
+/pom.xml              @mbmjava
+/app/pom.xml          @mbmjava
+/docs/standards/      @mbmjava
+/tools/               @mbmjava
+
+# Everything else defaults to the owner until the team grows.
+*                     @mbmjava

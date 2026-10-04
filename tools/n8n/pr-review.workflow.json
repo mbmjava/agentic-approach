@@ -1,0 +1,182 @@
+{
+  "name": "PR review (polling) — opencode/claude reviewer",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## PR review flow (starting point)\n\nPolling design: n8n cannot receive GitHub webhooks from the public internet at `n8n.localhost`, so this workflow **polls** open PRs on a schedule instead.\n\nFlow: Schedule -> List open PRs -> Get PR diff -> Prepare request -> **Review** -> Post review comment.\n\n**Swap point:** the *Review* node. It calls OpenRouter with the review rubric today. To hand review to a human, replace it with your notification/approval step (Slack, email, or a GitHub review request) and keep the same output contract.\n\nSet OWNER/REPO below, attach credentials (GitHub + OpenRouter), and pick a model matching `.opencode/models.json` (reviewer).",
+        "height": 320,
+        "width": 420
+      },
+      "id": "sticky-1",
+      "name": "Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -320]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "minutes", "minutesInterval": 15 }
+          ]
+        }
+      },
+      "id": "schedule-1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/OWNER/REPO/pulls",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "state", "value": "open" },
+            { "name": "sort", "value": "updated" },
+            { "name": "direction", "value": "desc" },
+            { "name": "per_page", "value": "20" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-list-1",
+      "name": "List open PRs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REPLACE_GITHUB_CRED_ID", "name": "GitHub" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Skip PRs already reviewed at their current head sha (workflow static data).\nconst store = $getWorkflowStaticData('global');\nconst reviewed = store.reviewed || {};\nconst out = [];\nfor (const item of $input.all()) {\n  const pr = item.json;\n  const key = String(pr.number);\n  if (reviewed[key] === pr.head.sha) continue;\n  out.push({ json: pr });\n}\nreturn out;"
+      },
+      "id": "dedup-1",
+      "name": "Dedup (skip reviewed sha)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [330, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.github.com/repos/OWNER/REPO/pulls/{{ $json.number }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github.v3.diff" }
+          ]
+        },
+        "options": { "response": { "response": { "responseFormat": "text" } } }
+      },
+      "id": "http-diff-1",
+      "name": "Get PR diff",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 0],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REPLACE_GITHUB_CRED_ID", "name": "GitHub" }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "body",
+              "name": "body",
+              "type": "string",
+              "value": "={{ JSON.stringify({ model: 'openai/gpt-6-luna', messages: [ { role: 'system', content: 'You are an independent, read-only PR reviewer. Review the diff against this checklist: correctness and intent; tests and evidence; docs updated in the same commit; scope and contracts; simplicity and anti-slop (no dead code, unused deps, speculative abstraction); harness changes (flag AGENTS.md, .opencode/**, .claude/**, .github/**, scripts/*, pom.xml, CLAUDE.md); boundaries (no credentials). Cite path:line; separate verified from inference. Do not approve or merge. Output: first line VERDICT: approve | request-changes | comment; then CHECKLIST: item=pass|fail|n-a; then FINDINGS: - [severity] path:line - problem / fix.' }, { role: 'user', content: 'Diff: ' + $json.data } ] }) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-1",
+      "name": "Prepare request",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "content": "## SWAP POINT\nReplace this node with a human step (Slack/email/GitHub review request) that returns the same VERDICT/CHECKLIST/FINDINGS contract. Nothing downstream changes.",
+        "height": 200,
+        "width": 320
+      },
+      "id": "sticky-2",
+      "name": "Swap note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [820, -240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "http-review-1",
+      "name": "Review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 0],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REPLACE_OPENROUTER_CRED_ID", "name": "OpenRouter" }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.github.com/repos/OWNER/REPO/issues/{{ $('List open PRs').item.json.number }}/comments",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ body: $json.choices[0].message.content }) }}",
+        "options": {}
+      },
+      "id": "http-comment-1",
+      "name": "Post review comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 0],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REPLACE_GITHUB_CRED_ID", "name": "GitHub" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Record the reviewed head sha so the next run skips it.\nconst store = $getWorkflowStaticData('global');\nstore.reviewed = store.reviewed || {};\nfor (const item of $input.all()) {\n  const pr = $('List open PRs').item.json;\n  store.reviewed[String(pr.number)] = pr.head.sha;\n}\nreturn $input.all();"
+      },
+      "id": "mark-1",
+      "name": "Mark reviewed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 0]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "List open PRs", "type": "main", "index": 0 }]] },
+    "List open PRs": { "main": [[{ "node": "Dedup (skip reviewed sha)", "type": "main", "index": 0 }]] },
+    "Dedup (skip reviewed sha)": { "main": [[{ "node": "Get PR diff", "type": "main", "index": 0 }]] },
+    "Get PR diff": { "main": [[{ "node": "Prepare request", "type": "main", "index": 0 }]] },
+    "Prepare request": { "main": [[{ "node": "Review", "type": "main", "index": 0 }]] },
+    "Review": { "main": [[{ "node": "Post review comment", "type": "main", "index": 0 }]] },
+    "Post review comment": { "main": [[{ "node": "Mark reviewed", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false,
+  "pinData": {}
+}

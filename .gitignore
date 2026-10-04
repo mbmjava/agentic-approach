@@ -1,0 +1,25 @@
+# Build output
+target/
+dist/
+build/
+output/
+
+# Node
+node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local config / secrets
+.env.local
+.env.*.local
+CLAUDE.local.md
+
+# Logs
+*.log
