@@ -7,6 +7,7 @@ A one-page path for standing up agentic coding in a new repository. Skip a step 
 - [ ] Real build, test, and run commands; architecture boundaries; environment limits.
 - [ ] A link to the central standards source, not a copy of them.
 - [ ] Non-negotiable workflow rules stated plainly (see the [template](agentic-coding-template.md)).
+- [ ] **Pick the typed baseline before the first commit.** In a typed ecosystem (for example TypeScript for a React app), standardize on it from day one; converting later means dependency and tooling churn and can leave CI checking a script that does not exist yet (a *phantom gate* — make the check real or delete it).
 
 ## 2. One worker, one template
 - [ ] A single worker/subagent with a clear scope and a least-privilege tool set.
