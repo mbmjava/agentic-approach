@@ -36,6 +36,21 @@ Only **GitHub** is exercised today; the contract does not change when GitLab is 
   email here. **No channel is wired yet.**
 - **Deployment** — later: the same neutral-event pattern feeds a deploy step.
 
+## Ensemble (experimental)
+
+`pr-review-ensemble.workflow.json` is a multi-judge variant: it fans the diff to N independent models,
+parses each `VERDICT`, and merges them in a `Consensus` node.
+
+- **Consensus:** any `request-changes` → `request-changes`; all `approve` → `approve`; otherwise
+  `comment`. If the judges disagree, the review comment says so.
+- **Models:** for now all three entries are `openai/gpt-6-luna` — **change later** to different families
+  for real diversity (author ≠ judge; Claude is intentionally excluded).
+- **Status context** is `n8n-ensemble` (vs `n8n-reviewer` for the single-model variant).
+- **Not wired to a live repo yet:** the experimental copy is pointed at a test repo and left **inactive**.
+  The live reviewer is unchanged, and no PRs are exercised yet.
+
+Human escalation on judge disagreement is the next step.
+
 ## Commit status
 
 `Build commit status` maps the verdict — `approve`/`comment` → `success`, `request-changes` → `failure`

@@ -1,0 +1,405 @@
+{
+  "id": "ensemblereview01",
+  "name": "PR review ENSEMBLE (agentic-approach, experimental)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "sched",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/mbmjava/agentic-approach/pulls",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "state",
+              "value": "open"
+            },
+            {
+              "name": "per_page",
+              "value": "20"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "list",
+      "name": "List open PRs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6RA4M9aFVi1MGE2k",
+          "name": "Github"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\nconst reviewed = store.reviewed || {};\nconst out = [];\nfor (const item of $input.all()) { const pr = item.json; if (reviewed[String(pr.number)] === pr.head.sha) continue; out.push({ json: pr }); }\nreturn out;"
+      },
+      "id": "dedup",
+      "name": "Dedup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.github.com/repos/mbmjava/agentic-approach/pulls/{{ $json.number }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3.diff"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "diff",
+      "name": "Get PR diff",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6RA4M9aFVi1MGE2k",
+          "name": "Github"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fan out one review request per model (independent judge ensemble).\nconst diff = $json.data || '';\nconst models = [\"openai/gpt-6-luna\",\"openai/gpt-6-luna\",\"openai/gpt-6-luna\"];\nconst system = \"You are an independent, read-only PR reviewer. Review the diff against this checklist: correctness and intent; tests and evidence; docs updated in the same commit; scope and contracts; simplicity and anti-slop; harness changes; boundaries (no credentials). Cite path:line; separate verified from inference. Do not approve or merge. Output: first line VERDICT: approve | request-changes | comment; then CHECKLIST: item=pass|fail|n-a; then FINDINGS: - [severity] path:line - problem / fix.\";\nreturn models.map((m) => ({ json: { model: m, body: JSON.stringify({ model: m, messages: [ { role: 'system', content: system }, { role: 'user', content: 'Diff: ' + diff } ] }) } }));"
+      },
+      "id": "prepare",
+      "name": "Prepare requests",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "review",
+      "name": "Review (ensemble)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "a8T57XCW4YX6RoZO",
+          "name": "OpenRouter"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge independent judge verdicts into one consensus.\nconst reqs = $('Prepare requests').all();\nconst results = $input.all();\nconst parsed = results.map((it, i) => {\n  const c = (it.json.choices && it.json.choices[0] && it.json.choices[0].message && it.json.choices[0].message.content) || '';\n  const vl = c.split('\\n').find((l) => /VERDICT\\s*:/i.test(l)) || '';\n  const verdict = /request-changes/i.test(vl) ? 'request-changes' : /approve/i.test(vl) ? 'approve' : 'comment';\n  const model = (reqs[i] && reqs[i].json && reqs[i].json.model) || (it.json.model || ('model-' + i));\n  return { model, verdict, content: c };\n});\nconst anyChanges = parsed.some((r) => r.verdict === 'request-changes');\nconst allApprove = parsed.length > 0 && parsed.every((r) => r.verdict === 'approve');\nconst verdict = anyChanges ? 'request-changes' : allApprove ? 'approve' : 'comment';\nconst disagreement = new Set(parsed.map((r) => r.verdict)).size > 1;\nconst comment = '**Ensemble verdict: ' + verdict + (disagreement ? ' (judges disagreed)' : '') + '**\\n\\n' + parsed.map((r) => '### ' + r.model + ' - ' + r.verdict + '\\n' + r.content).join('\\n\\n');\nconst sha = $('List open PRs').item.json.head.sha;\nreturn [{ json: { verdict, disagreement, judgeCount: parsed.length, comment, sha } }];"
+      },
+      "id": "consensus",
+      "name": "Consensus",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.github.com/repos/mbmjava/agentic-approach/issues/{{ $('List open PRs').item.json.number }}/comments",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ body: $json.comment }) }}",
+        "options": {}
+      },
+      "id": "comment",
+      "name": "Post review comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6RA4M9aFVi1MGE2k",
+          "name": "Github"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const v = $('Consensus').item.json.verdict;\nconst state = v === 'request-changes' ? 'failure' : 'success';\nreturn [{ json: { sha: $('Consensus').item.json.sha, body: { state, context: 'n8n-ensemble', description: ('ensemble: ' + v).slice(0, 140) } } }];"
+      },
+      "id": "bstatus",
+      "name": "Build commit status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.github.com/repos/mbmjava/agentic-approach/statuses/{{ $json.sha }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {}
+      },
+      "id": "sstatus",
+      "name": "Set commit status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6RA4M9aFVi1MGE2k",
+          "name": "Github"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Platform-neutral visibility event.\nconst pr = $('List open PRs').item.json;\nconst c = $('Consensus').item.json;\nconst text = 'PR #' + pr.number + ' ' + pr.title + '\\nEnsemble verdict: ' + c.verdict + (c.disagreement ? ' (disagreement)' : '') + '\\nJudges: ' + c.judgeCount;\nreturn [{ json: { channel: 'none', event: 'pr-review', title: 'PR #' + pr.number, text, url: pr.html_url, verdict: c.verdict, sha: c.sha } }];"
+      },
+      "id": "digest",
+      "name": "Build digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "swap",
+      "name": "Notify (swap point)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2420,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\nstore.reviewed = store.reviewed || {};\nfor (const item of $input.all()) { const pr = $('List open PRs').item.json; store.reviewed[String(pr.number)] = pr.head.sha; }\nreturn $input.all();"
+      },
+      "id": "mark",
+      "name": "Mark reviewed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "List open PRs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List open PRs": {
+      "main": [
+        [
+          {
+            "node": "Dedup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup": {
+      "main": [
+        [
+          {
+            "node": "Get PR diff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get PR diff": {
+      "main": [
+        [
+          {
+            "node": "Prepare requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare requests": {
+      "main": [
+        [
+          {
+            "node": "Review (ensemble)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review (ensemble)": {
+      "main": [
+        [
+          {
+            "node": "Consensus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consensus": {
+      "main": [
+        [
+          {
+            "node": "Post review comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post review comment": {
+      "main": [
+        [
+          {
+            "node": "Build commit status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build commit status": {
+      "main": [
+        [
+          {
+            "node": "Set commit status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set commit status": {
+      "main": [
+        [
+          {
+            "node": "Build digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build digest": {
+      "main": [
+        [
+          {
+            "node": "Notify (swap point)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify (swap point)": {
+      "main": [
+        [
+          {
+            "node": "Mark reviewed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {}
+}
