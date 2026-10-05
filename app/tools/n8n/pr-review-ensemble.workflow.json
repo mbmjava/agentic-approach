@@ -1,6 +1,6 @@
 {
   "id": "ensemblereview01",
-  "name": "PR review ENSEMBLE (agentic-approach, experimental)",
+  "name": "PR review ENSEMBLE - GitHub adapter",
   "nodes": [
     {
       "parameters": {
@@ -8,7 +8,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 1
+              "minutesInterval": 15
             }
           ]
         }
@@ -25,7 +25,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "https://api.github.com/repos/mbmjava/agentic-approach/pulls",
+        "url": "https://api.github.com/repos/OWNER/REPO/pulls",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -60,7 +60,7 @@
       ],
       "credentials": {
         "httpHeaderAuth": {
-          "id": "6RA4M9aFVi1MGE2k",
+          "id": "REPLACE_GITHUB_CRED_ID",
           "name": "Github"
         }
       }
@@ -81,7 +81,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "=https://api.github.com/repos/mbmjava/agentic-approach/pulls/{{ $json.number }}",
+        "url": "=https://api.github.com/repos/OWNER/REPO/pulls/{{ $json.number }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -109,19 +109,33 @@
       ],
       "credentials": {
         "httpHeaderAuth": {
-          "id": "6RA4M9aFVi1MGE2k",
+          "id": "REPLACE_GITHUB_CRED_ID",
           "name": "Github"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Fan out one review request per model (independent judge ensemble).\nconst diff = $json.data || '';\nconst models = [\"openai/gpt-6-luna\",\"openai/gpt-6-luna\",\"openai/gpt-6-luna\"];\nconst system = \"You are an independent, read-only PR reviewer. Review the diff against this checklist: correctness and intent; tests and evidence; docs updated in the same commit; scope and contracts; simplicity and anti-slop; harness changes; boundaries (no credentials). Cite path:line; separate verified from inference. Do not approve or merge. Output: first line VERDICT: approve | request-changes | comment; then CHECKLIST: item=pass|fail|n-a; then FINDINGS: - [severity] path:line - problem / fix.\";\nreturn models.map((m) => ({ json: { model: m, body: JSON.stringify({ model: m, messages: [ { role: 'system', content: system }, { role: 'user', content: 'Diff: ' + diff } ] }) } }));"
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "REPLACE_JUDGE_ID",
+          "mode": "list",
+          "cachedResultName": "judge - multi-model review (provider-neutral)"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "diff": "={{ $json.data }}",
+            "models": "openai/gpt-6-luna,openai/gpt-6-luna,openai/gpt-6-luna"
+          }
+        },
+        "options": {}
       },
-      "id": "prepare",
-      "name": "Prepare requests",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "id": "judge-call",
+      "name": "Judge",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
       "position": [
         880,
         0
@@ -130,44 +144,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://openrouter.ai/api/v1/chat/completions",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json.body }}",
-        "options": {}
-      },
-      "id": "review",
-      "name": "Review (ensemble)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1100,
-        0
-      ],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "a8T57XCW4YX6RoZO",
-          "name": "OpenRouter"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Merge independent judge verdicts into one consensus.\nconst reqs = $('Prepare requests').all();\nconst results = $input.all();\nconst parsed = results.map((it, i) => {\n  const c = (it.json.choices && it.json.choices[0] && it.json.choices[0].message && it.json.choices[0].message.content) || '';\n  const vl = c.split('\\n').find((l) => /VERDICT\\s*:/i.test(l)) || '';\n  const verdict = /request-changes/i.test(vl) ? 'request-changes' : /approve/i.test(vl) ? 'approve' : 'comment';\n  const model = (reqs[i] && reqs[i].json && reqs[i].json.model) || (it.json.model || ('model-' + i));\n  return { model, verdict, content: c };\n});\nconst anyChanges = parsed.some((r) => r.verdict === 'request-changes');\nconst allApprove = parsed.length > 0 && parsed.every((r) => r.verdict === 'approve');\nconst verdict = anyChanges ? 'request-changes' : allApprove ? 'approve' : 'comment';\nconst disagreement = new Set(parsed.map((r) => r.verdict)).size > 1;\nconst comment = '**Ensemble verdict: ' + verdict + (disagreement ? ' (judges disagreed)' : '') + '**\\n\\n' + parsed.map((r) => '### ' + r.model + ' - ' + r.verdict + '\\n' + r.content).join('\\n\\n');\nconst sha = $('List open PRs').item.json.head.sha;\nreturn [{ json: { verdict, disagreement, judgeCount: parsed.length, comment, sha } }];"
-      },
-      "id": "consensus",
-      "name": "Consensus",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1320,
-        0
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "=https://api.github.com/repos/mbmjava/agentic-approach/issues/{{ $('List open PRs').item.json.number }}/comments",
+        "url": "=https://api.github.com/repos/OWNER/REPO/issues/{{ $('List open PRs').item.json.number }}/comments",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ body: $json.comment }) }}",
@@ -178,33 +155,33 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1540,
+        1100,
         0
       ],
       "credentials": {
         "httpHeaderAuth": {
-          "id": "6RA4M9aFVi1MGE2k",
+          "id": "REPLACE_GITHUB_CRED_ID",
           "name": "Github"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const c = $('Consensus').item.json;\nconst state = c.verdict === 'request-changes' ? 'failure' : c.disagreement ? 'pending' : 'success';\nconst desc = c.disagreement ? 'escalated: judges disagreed' : ('ensemble: ' + c.verdict);\nreturn [{ json: { sha: c.sha, escalate: !!c.disagreement, body: { state, context: 'n8n-ensemble', description: desc.slice(0, 140) } } }];"
+        "jsCode": "const c = $('Judge').item.json;\nconst sha = $('List open PRs').item.json.head.sha;\nconst state = c.verdict === 'request-changes' ? 'failure' : c.disagreement ? 'pending' : 'success';\nconst desc = c.disagreement ? 'escalated: judges disagreed' : ('verdict: ' + c.verdict);\nreturn [{ json: { sha, escalate: !!c.disagreement, body: { state, context: 'n8n-reviewer', description: desc.slice(0, 140) } } }];"
       },
       "id": "bstatus",
       "name": "Build commit status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1760,
+        1320,
         0
       ]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://api.github.com/repos/mbmjava/agentic-approach/statuses/{{ $json.sha }}",
+        "url": "=https://api.github.com/repos/OWNER/REPO/statuses/{{ $json.sha }}",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json.body) }}",
@@ -215,26 +192,26 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1980,
+        1540,
         0
       ],
       "credentials": {
         "httpHeaderAuth": {
-          "id": "6RA4M9aFVi1MGE2k",
+          "id": "REPLACE_GITHUB_CRED_ID",
           "name": "Github"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Platform-neutral visibility event (carries escalation).\nconst pr = $('List open PRs').item.json;\nconst c = $('Consensus').item.json;\nconst text = 'PR #' + pr.number + ' ' + pr.title + '\\nEnsemble verdict: ' + c.verdict + (c.disagreement ? ' (disagreement)' : '') + '\\nJudges: ' + c.judgeCount;\nreturn [{ json: { channel: 'none', event: c.disagreement ? 'pr-review-escalation' : 'pr-review', escalate: !!c.disagreement, title: 'PR #' + pr.number, text, url: pr.html_url, verdict: c.verdict, sha: c.sha } }];"
+        "jsCode": "const pr = $('List open PRs').item.json;\nconst c = $('Judge').item.json;\nconst text = 'PR #' + pr.number + ' ' + pr.title + '\\nVerdict: ' + c.verdict + (c.disagreement ? ' (disagreement)' : '') + '\\nJudges: ' + c.judgeCount;\nreturn [{ json: { channel: 'none', event: c.disagreement ? 'pr-review-escalation' : 'pr-review', escalate: !!c.disagreement, title: 'PR #' + pr.number, text, url: pr.html_url, verdict: c.verdict } }];"
       },
       "id": "digest",
       "name": "Build digest",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2200,
+        1760,
         0
       ]
     },
@@ -243,11 +220,10 @@
         "source": "database",
         "workflowId": {
           "__rl": true,
-          "value": "notifydispatch001",
+          "value": "REPLACE_NOTIFY_ID",
           "mode": "list",
           "cachedResultName": "notify - channel adapters (swap point)"
         },
-        "options": {},
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
@@ -258,14 +234,15 @@
             "text": "={{ $json.text }}",
             "url": "={{ $json.url }}"
           }
-        }
+        },
+        "options": {}
       },
-      "id": "swap",
+      "id": "notify",
       "name": "Notify (swap point)",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2420,
+        1980,
         0
       ]
     },
@@ -278,7 +255,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2640,
+        2200,
         0
       ]
     }
@@ -321,36 +298,14 @@
       "main": [
         [
           {
-            "node": "Prepare requests",
+            "node": "Judge",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Prepare requests": {
-      "main": [
-        [
-          {
-            "node": "Review (ensemble)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Review (ensemble)": {
-      "main": [
-        [
-          {
-            "node": "Consensus",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Consensus": {
+    "Judge": {
       "main": [
         [
           {

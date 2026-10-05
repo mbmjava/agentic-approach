@@ -25,8 +25,19 @@ Only **GitHub** is exercised today; the contract does not change when GitLab is 
 
 ## Flow
 
-`Schedule → List open PRs → Dedup → Get PR diff → Prepare request → Review (judge) → Post review comment
-→ Set commit status → Build digest → Notify (swap point) → Mark reviewed`
+`Schedule → List open PRs → Dedup → Get PR diff → **Judge** (sub-workflow) → Post review comment →
+Set commit status → Build digest → Notify (swap point) → Mark reviewed`
+
+## Judge (provider-neutral sub-workflow)
+
+`judge.workflow.json` owns the review logic so adapters don't: input = `diff` + `models`; output =
+`{ verdict, disagreement, judgeCount, comment }`. It fans out one request per model (comma-separated
+`models`, default `openai/gpt-6-luna`), then merges verdicts in a `Consensus` node.
+
+- The **GitHub adapter** passes `models` = one model (single) or several (ensemble). The GitLab adapter,
+  when built, calls the same judge — provider differences stay in the List/Get-diff/Comment/Status nodes.
+- **Consensus:** any `request-changes` → `request-changes`; all approve → `approve`; else `comment`.
+- **Escalation:** disagreement sets the commit status to `pending` and flags the event `escalate`. 
 
 ## Swap points (pluggable)
 

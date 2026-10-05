@@ -1,21 +1,7 @@
 {
-  "name": "PR review (polling) — provider-neutral judge",
+  "id": "prreviewgithub01",
+  "name": "PR review (polling) - GitHub adapter",
   "nodes": [
-    {
-      "parameters": {
-        "content": "## PR review flow (provider-neutral)\n\nPolling design: n8n cannot receive provider webhooks at `n8n.localhost`, so this workflow **polls** open PRs on a schedule.\n\nFlow: Schedule -> List open PRs -> Dedup -> Get PR diff -> Prepare request -> **Review (judge)** -> Post review comment -> Set commit status -> Build digest -> Notify (swap point) -> Mark reviewed.\n\nThe **judge** is a stable contract: input = diff + PR metadata; output = `VERDICT` / `CHECKLIST` / `FINDINGS`. Any reviewer (agent or human) can fill it.\n\nProvider nodes (List/Get diff/Comment/Status) are the **GitHub adapter**; a GitLab variant mirrors them. Keep the merge **gate** in the provider (branch protection / protected branches), not here.\n\nNo visibility channel is wired yet: `Notify (swap point)` is a no-op that receives a neutral event. Plug Slack/email/deployment there later.",
-        "height": 360,
-        "width": 460
-      },
-      "id": "sticky-1",
-      "name": "Notes",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -60,
-        -360
-      ]
-    },
     {
       "parameters": {
         "rule": {
@@ -27,7 +13,7 @@
           ]
         }
       },
-      "id": "schedule-1",
+      "id": "sched",
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -48,14 +34,6 @@
               "value": "open"
             },
             {
-              "name": "sort",
-              "value": "updated"
-            },
-            {
-              "name": "direction",
-              "value": "desc"
-            },
-            {
               "name": "per_page",
               "value": "20"
             }
@@ -72,7 +50,7 @@
         },
         "options": {}
       },
-      "id": "http-list-1",
+      "id": "list",
       "name": "List open PRs",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -83,16 +61,16 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "REPLACE_GITHUB_CRED_ID",
-          "name": "GitHub"
+          "name": "Github"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Skip PRs already reviewed at their current head sha (workflow static data).\nconst store = $getWorkflowStaticData('global');\nconst reviewed = store.reviewed || {};\nconst out = [];\nfor (const item of $input.all()) {\n  const pr = item.json;\n  const key = String(pr.number);\n  if (reviewed[key] === pr.head.sha) continue;\n  out.push({ json: pr });\n}\nreturn out;"
+        "jsCode": "const store = $getWorkflowStaticData('global');\nconst reviewed = store.reviewed || {};\nconst out = [];\nfor (const item of $input.all()) { const pr = item.json; if (reviewed[String(pr.number)] === pr.head.sha) continue; out.push({ json: pr }); }\nreturn out;"
       },
-      "id": "dedup-1",
-      "name": "Dedup (skip reviewed sha)",
+      "id": "dedup",
+      "name": "Dedup",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -121,7 +99,7 @@
           }
         }
       },
-      "id": "http-diff-1",
+      "id": "diff",
       "name": "Get PR diff",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -132,28 +110,32 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "REPLACE_GITHUB_CRED_ID",
-          "name": "GitHub"
+          "name": "Github"
         }
       }
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "body",
-              "name": "body",
-              "type": "string",
-              "value": "={{ JSON.stringify({ model: 'openai/gpt-6-luna', messages: [ { role: 'system', content: 'You are an independent, read-only PR reviewer. Review the diff against this checklist: correctness and intent; tests and evidence; docs updated in the same commit; scope and contracts; simplicity and anti-slop (no dead code, unused deps, speculative abstraction); harness changes (flag AGENTS.md, .opencode/**, .claude/**, .github/**, scripts/*, pom.xml, CLAUDE.md); boundaries (no credentials). Cite path:line; separate verified from inference. Do not approve or merge. Output: first line VERDICT: approve | request-changes | comment; then CHECKLIST: item=pass|fail|n-a; then FINDINGS: - [severity] path:line - problem / fix.' }, { role: 'user', content: 'Diff: ' + $json.data } ] }) }}"
-            }
-          ]
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "REPLACE_JUDGE_ID",
+          "mode": "list",
+          "cachedResultName": "judge - multi-model review (provider-neutral)"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "diff": "={{ $json.data }}",
+            "models": "openai/gpt-6-luna"
+          }
         },
         "options": {}
       },
-      "id": "set-1",
-      "name": "Prepare request",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "id": "judge-call",
+      "name": "Judge",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
       "position": [
         880,
         0
@@ -161,30 +143,15 @@
     },
     {
       "parameters": {
-        "content": "## JUDGE — swap point\nReplace this node with a human step (Slack/email/review request) that returns the same `VERDICT` / `CHECKLIST` / `FINDINGS` contract. Nothing downstream changes.",
-        "height": 200,
-        "width": 320
-      },
-      "id": "sticky-2",
-      "name": "Judge note",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1020,
-        -260
-      ]
-    },
-    {
-      "parameters": {
         "method": "POST",
-        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "url": "=https://api.github.com/repos/OWNER/REPO/issues/{{ $('List open PRs').item.json.number }}/comments",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ $json.body }}",
+        "jsonBody": "={{ JSON.stringify({ body: $json.comment }) }}",
         "options": {}
       },
-      "id": "http-review-1",
-      "name": "Review",
+      "id": "comment",
+      "name": "Post review comment",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -193,45 +160,21 @@
       ],
       "credentials": {
         "httpHeaderAuth": {
-          "id": "REPLACE_OPENROUTER_CRED_ID",
-          "name": "OpenRouter"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "=https://api.github.com/repos/OWNER/REPO/issues/{{ $('List open PRs').item.json.number }}/comments",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ body: $json.choices[0].message.content }) }}",
-        "options": {}
-      },
-      "id": "http-comment-1",
-      "name": "Post review comment",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1320,
-        0
-      ],
-      "credentials": {
-        "httpHeaderAuth": {
           "id": "REPLACE_GITHUB_CRED_ID",
-          "name": "GitHub"
+          "name": "Github"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Map the reviewer verdict to a provider-agnostic outcome.\n// approve/comment -> success; request-changes -> failure (a cited blocker should block).\nconst content = $('Review').item.json.choices[0].message.content || '';\nconst verdictLine = content.split('\\n').find((l) => /VERDICT\\s*:/i.test(l)) || '';\nconst verdict = /request-changes/i.test(verdictLine) ? 'request-changes' : /approve/i.test(verdictLine) ? 'approve' : 'comment';\nconst state = verdict === 'request-changes' ? 'failure' : 'success';\nconst sha = $('List open PRs').item.json.head.sha;\nreturn [{ json: { sha, verdict, body: { state, context: 'n8n-reviewer', description: ('reviewer: ' + verdict).slice(0, 140) } } }];"
+        "jsCode": "const c = $('Judge').item.json;\nconst sha = $('List open PRs').item.json.head.sha;\nconst state = c.verdict === 'request-changes' ? 'failure' : c.disagreement ? 'pending' : 'success';\nconst desc = c.disagreement ? 'escalated: judges disagreed' : ('verdict: ' + c.verdict);\nreturn [{ json: { sha, escalate: !!c.disagreement, body: { state, context: 'n8n-reviewer', description: desc.slice(0, 140) } } }];"
       },
-      "id": "build-status-1",
+      "id": "bstatus",
       "name": "Build commit status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1540,
+        1320,
         0
       ]
     },
@@ -244,31 +187,31 @@
         "jsonBody": "={{ JSON.stringify($json.body) }}",
         "options": {}
       },
-      "id": "set-status-1",
+      "id": "sstatus",
       "name": "Set commit status",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1760,
+        1540,
         0
       ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "REPLACE_GITHUB_CRED_ID",
-          "name": "GitHub"
+          "name": "Github"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Emit a PLATFORM-NEUTRAL event. Add channels/deployment at the `Notify (swap point)` node.\nconst pr = $('List open PRs').item.json;\nconst content = $('Review').item.json.choices[0].message.content || '';\nconst lines = content.split('\\n');\nconst verdictLine = lines.find((l) => /VERDICT\\s*:/i.test(l)) || 'VERDICT: (unknown)';\nconst verdict = /request-changes/i.test(verdictLine) ? 'request-changes' : /approve/i.test(verdictLine) ? 'approve' : 'comment';\nconst findings = lines.filter((l) => /^\\s*-\\s*\\[/.test(l)).slice(0, 5).join('\\n');\nconst text = ['PR #' + pr.number + ' ' + pr.title, (pr.user && pr.user.login ? pr.user.login : '') + ' @ ' + String(pr.head.sha).slice(0, 7), 'Verdict: ' + verdict, findings ? 'Findings:\\n' + findings : ''].filter(Boolean).join('\\n');\nreturn [{ json: { channel: 'none', event: 'pr-review', title: 'PR #' + pr.number + ' ' + pr.title, text, url: pr.html_url, verdict, pr: pr.number, sha: pr.head.sha } }];"
+        "jsCode": "const pr = $('List open PRs').item.json;\nconst c = $('Judge').item.json;\nconst text = 'PR #' + pr.number + ' ' + pr.title + '\\nVerdict: ' + c.verdict + (c.disagreement ? ' (disagreement)' : '') + '\\nJudges: ' + c.judgeCount;\nreturn [{ json: { channel: 'none', event: c.disagreement ? 'pr-review-escalation' : 'pr-review', escalate: !!c.disagreement, title: 'PR #' + pr.number, text, url: pr.html_url, verdict: c.verdict } }];"
       },
-      "id": "build-digest-1",
+      "id": "digest",
       "name": "Build digest",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1980,
+        1760,
         0
       ]
     },
@@ -277,11 +220,10 @@
         "source": "database",
         "workflowId": {
           "__rl": true,
-          "value": "notifydispatch001",
+          "value": "REPLACE_NOTIFY_ID",
           "mode": "list",
           "cachedResultName": "notify - channel adapters (swap point)"
         },
-        "options": {},
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
@@ -292,42 +234,28 @@
             "text": "={{ $json.text }}",
             "url": "={{ $json.url }}"
           }
-        }
+        },
+        "options": {}
       },
-      "id": "notify-swap-1",
+      "id": "notify",
       "name": "Notify (swap point)",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2200,
+        1980,
         0
       ]
     },
     {
       "parameters": {
-        "content": "## VISIBILITY — swap point\nNo-op placeholder. The flow emits a neutral event (`channel, event, title, text, url, meta`).\n\nPlug channels here later (Slack, Teams, email) and, separately, a deployment sink. The review logic does not change. No channel is wired yet.",
-        "height": 240,
-        "width": 340
+        "jsCode": "const store = $getWorkflowStaticData('global');\nstore.reviewed = store.reviewed || {};\nfor (const item of $input.all()) { const pr = $('List open PRs').item.json; store.reviewed[String(pr.number)] = pr.head.sha; }\nreturn $input.all();"
       },
-      "id": "sticky-3",
-      "name": "Visibility note",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        2100,
-        -240
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Record the reviewed head sha so the next run skips it.\nconst store = $getWorkflowStaticData('global');\nstore.reviewed = store.reviewed || {};\nfor (const item of $input.all()) {\n  const pr = $('List open PRs').item.json;\n  store.reviewed[String(pr.number)] = pr.head.sha;\n}\nreturn $input.all();"
-      },
-      "id": "mark-1",
+      "id": "mark",
       "name": "Mark reviewed",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2420,
+        2200,
         0
       ]
     }
@@ -348,14 +276,14 @@
       "main": [
         [
           {
-            "node": "Dedup (skip reviewed sha)",
+            "node": "Dedup",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Dedup (skip reviewed sha)": {
+    "Dedup": {
       "main": [
         [
           {
@@ -370,25 +298,14 @@
       "main": [
         [
           {
-            "node": "Prepare request",
+            "node": "Judge",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Prepare request": {
-      "main": [
-        [
-          {
-            "node": "Review",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Review": {
+    "Judge": {
       "main": [
         [
           {
