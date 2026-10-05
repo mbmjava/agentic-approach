@@ -76,6 +76,8 @@ Workers should self-check within their permitted tools and report the exact comm
 
 Self-verification is useful evidence, not a substitute for the integration gate. Report checks that were not run as **not verified**.
 
+**Add an independent per-slice review for consequential work.** For a multi-file slice, a migration, or anything the orchestrator cannot fully read, have a **separate reviewer — ideally a different model from the one that authored the change** — review the diff before accepting it. The reviewer hunts for concrete defects (type/contract mismatches, missed edge cases, behavior drift) and cites evidence; the orchestrator either fixes them in the slice or records them as durable known-issues. Self-verification plus a scope check is not the same as an independent review — the author shares its own blind spots.
+
 In the Tagwell example, workers may run only an **exact, enumerated** set of repository wrappers — an allowlisted module compile (`node scripts/worker-verify.mjs <module>`), a strict frontend typecheck (`node scripts/frontend-worker-verify.mjs`), `check-docs`, and `code-map` — with no arguments, chaining, or pipes; git stays read-only (`status --short`, `diff`, `log`). The orchestrator serializes builds, checks `git status` after each worker pass, and rejects files outside the assignment. When migrating a typed frontend incrementally, the orchestrator **registers the worker's new file in the shared project** (e.g. `tsconfig.app.json`) *before* delegating the slice, because the no-argument verifier checks that shared project and cannot see an unregistered file. Adapt those exact commands to the target repository rather than copying them literally.
 
 ## Bound expensive or risky operations

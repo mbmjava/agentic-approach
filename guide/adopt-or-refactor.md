@@ -66,6 +66,15 @@ Use a living plan for current state and a concise handoff for session changes. A
 
 Add a mechanical worker, reviewer, skills, commands, or more parallel lanes only when repeated tasks justify them. Measure whether each addition reduces cycle time or errors enough to offset coordination, review, and model cost.
 
+### Migrating the stack: one axis at a time
+
+When modernizing an existing app, change **one axis per slice** and keep each independently verifiable — no behavior redesign mixed into a toolchain or language change. A proven order:
+
+1. **Behavioral coverage first.** Stand up a deterministic browser/smoke test on the current behavior *before* touching tooling or language, so the upgrades and conversion have a regression net.
+2. **Tooling/runtime upgrades, separately.** Do framework/build/runtime bumps as their own green slices.
+3. **Language/type migration, contract-first.** Type the shared transport and endpoint contracts first, then consumers feature by feature; keep a compatibility shim for unconverted files; **tighten or remove the leniencies** (e.g. `allowJs`, loose `strict`) **only after the last module is migrated.**
+4. **Review each slice independently** (see [Delegate safely](delegate-safely.md)) and track progress as a ratio (e.g. `54/102 TypeScript`) in the living plan. Newly evidenced risks go to the durable known-issues register, not only the plan.
+
 ## Refactor in risk order
 
 Do not rewrite the whole agent environment at once. A practical order is:

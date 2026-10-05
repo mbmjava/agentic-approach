@@ -73,4 +73,5 @@ The role, collaboration, cost, verification, and recovery principles are tool-ne
 - 2026-10-04 — Moved the guide to GitHub-flavored Markdown in the `agentic-approach` repository, with a bundled harness and a blank Maven + React app. Dropped the Writerside instance and its sample topics; the TOC is now `guide/README.md`.
 - 2026-10-04 — Bootstrap checklist: pick the typed baseline before the first commit (retrofitting causes churn and phantom gates).
 - 2026-10-05 — Worker delegation: exact-command allowlists (not globs), stack-specific no-argument verifiers, and registering a migrated file in the shared project before delegating a typed slice.
+- 2026-10-05 — Independent per-slice review for delegated work, and a stack-migration cadence (coverage → tooling → contract-first typing, tighten config last; track progress as a ratio).
 - 2026-10-04 — Enforcement: run static analysis report-first, then gate only the rules with a real hit rate.
