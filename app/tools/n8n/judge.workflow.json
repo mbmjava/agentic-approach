@@ -48,7 +48,9 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ $json.body }}",
-        "options": {}
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth"
       },
       "id": "jreview",
       "name": "Review",
@@ -59,7 +61,7 @@
         0
       ],
       "credentials": {
-        "httpHeaderAuth": {
+        "httpBearerAuth": {
           "id": "REPLACE_OPENROUTER_CRED_ID",
           "name": "OpenRouter"
         }

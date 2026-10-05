@@ -83,6 +83,17 @@ notify adapter.
   Workflow) or per-workflow via `settings.errorWorkflow`.
 - It must be **published** to be selectable as an error workflow.
 
+## Calibration
+
+`calibration.workflow.json` scores the judge against a **labeled corpus** (read-only): run the judge on
+each diff, compare to the expected label, and report precision/recall for `request-changes`.
+
+- Corpus is pluggable: the synthetic seed (clean / missing-tests / secret / contract-change / docs-only /
+  scope-creep) runs now; point it at real merged-PR history later.
+- Baseline (2026-10-05, `openai/gpt-6-luna`): **precision 1.0, recall 1.0, agreement 6/6, 0 false-approves.**
+- Caveat: on the two genuinely-clean cases the model returned `comment`, not `approve` — so nothing would
+  auto-merge without tuning the prompt or relaxing the approve condition.
+
 ## Import
 
 1. n8n → **Import from File** → the workflow JSON. Import **both** `notify.workflow.json` (channel

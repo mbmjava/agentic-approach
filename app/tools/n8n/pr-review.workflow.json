@@ -48,7 +48,9 @@
             }
           ]
         },
-        "options": {}
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth"
       },
       "id": "list",
       "name": "List open PRs",
@@ -59,7 +61,7 @@
         0
       ],
       "credentials": {
-        "httpHeaderAuth": {
+        "httpBearerAuth": {
           "id": "REPLACE_GITHUB_CRED_ID",
           "name": "Github"
         }
@@ -97,7 +99,9 @@
               "responseFormat": "text"
             }
           }
-        }
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth"
       },
       "id": "diff",
       "name": "Get PR diff",
@@ -108,7 +112,7 @@
         0
       ],
       "credentials": {
-        "httpHeaderAuth": {
+        "httpBearerAuth": {
           "id": "REPLACE_GITHUB_CRED_ID",
           "name": "Github"
         }
@@ -130,7 +134,8 @@
             "models": "openai/gpt-6-luna"
           }
         },
-        "options": {}
+        "options": {},
+        "mode": "each"
       },
       "id": "judge-call",
       "name": "Judge",
@@ -148,7 +153,9 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ body: $json.comment }) }}",
-        "options": {}
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth"
       },
       "id": "comment",
       "name": "Post review comment",
@@ -159,7 +166,7 @@
         0
       ],
       "credentials": {
-        "httpHeaderAuth": {
+        "httpBearerAuth": {
           "id": "REPLACE_GITHUB_CRED_ID",
           "name": "Github"
         }
@@ -167,7 +174,8 @@
     },
     {
       "parameters": {
-        "jsCode": "const c = $('Judge').item.json;\nconst sha = $('List open PRs').item.json.head.sha;\nconst state = c.verdict === 'request-changes' ? 'failure' : c.disagreement ? 'pending' : 'success';\nconst desc = c.disagreement ? 'escalated: judges disagreed' : ('verdict: ' + c.verdict);\nreturn [{ json: { sha, escalate: !!c.disagreement, body: { state, context: 'n8n-reviewer', description: desc.slice(0, 140) } } }];"
+        "jsCode": "const c = $('Judge').item.json;\nconst sha = $('List open PRs').item.json.head.sha;\nconst state = c.verdict === 'request-changes' ? 'failure' : c.disagreement ? 'pending' : 'success';\nconst desc = c.disagreement ? 'escalated: judges disagreed' : ('verdict: ' + c.verdict);\nreturn [{ json: { sha, escalate: !!c.disagreement, body: { state, context: 'n8n-reviewer', description: desc.slice(0, 140) } } }];",
+        "mode": "runOnceForEachItem"
       },
       "id": "bstatus",
       "name": "Build commit status",
@@ -185,7 +193,9 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json.body) }}",
-        "options": {}
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth"
       },
       "id": "sstatus",
       "name": "Set commit status",
@@ -196,7 +206,7 @@
         0
       ],
       "credentials": {
-        "httpHeaderAuth": {
+        "httpBearerAuth": {
           "id": "REPLACE_GITHUB_CRED_ID",
           "name": "Github"
         }
@@ -204,7 +214,8 @@
     },
     {
       "parameters": {
-        "jsCode": "const pr = $('List open PRs').item.json;\nconst c = $('Judge').item.json;\nconst text = 'PR #' + pr.number + ' ' + pr.title + '\\nVerdict: ' + c.verdict + (c.disagreement ? ' (disagreement)' : '') + '\\nJudges: ' + c.judgeCount;\nreturn [{ json: { channel: 'none', event: c.disagreement ? 'pr-review-escalation' : 'pr-review', escalate: !!c.disagreement, title: 'PR #' + pr.number, text, url: pr.html_url, verdict: c.verdict } }];"
+        "jsCode": "const pr = $('List open PRs').item.json;\nconst c = $('Judge').item.json;\nconst text = 'PR #' + pr.number + ' ' + pr.title + '\\nVerdict: ' + c.verdict + (c.disagreement ? ' (disagreement)' : '') + '\\nJudges: ' + c.judgeCount;\nreturn [{ json: { channel: 'none', event: c.disagreement ? 'pr-review-escalation' : 'pr-review', escalate: !!c.disagreement, title: 'PR #' + pr.number, text, url: pr.html_url, verdict: c.verdict } }];",
+        "mode": "runOnceForEachItem"
       },
       "id": "digest",
       "name": "Build digest",
@@ -235,7 +246,8 @@
             "url": "={{ $json.url }}"
           }
         },
-        "options": {}
+        "options": {},
+        "mode": "each"
       },
       "id": "notify",
       "name": "Notify (swap point)",
