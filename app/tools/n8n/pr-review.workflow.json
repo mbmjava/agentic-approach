@@ -11,13 +11,19 @@
       "name": "Notes",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-60, -360]
+      "position": [
+        -60,
+        -360
+      ]
     },
     {
       "parameters": {
         "rule": {
           "interval": [
-            { "field": "minutes", "minutesInterval": 15 }
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
           ]
         }
       },
@@ -25,7 +31,10 @@
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [0, 0]
+      "position": [
+        0,
+        0
+      ]
     },
     {
       "parameters": {
@@ -34,16 +43,31 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "state", "value": "open" },
-            { "name": "sort", "value": "updated" },
-            { "name": "direction", "value": "desc" },
-            { "name": "per_page", "value": "20" }
+            {
+              "name": "state",
+              "value": "open"
+            },
+            {
+              "name": "sort",
+              "value": "updated"
+            },
+            {
+              "name": "direction",
+              "value": "desc"
+            },
+            {
+              "name": "per_page",
+              "value": "20"
+            }
           ]
         },
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Accept", "value": "application/vnd.github+json" }
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
           ]
         },
         "options": {}
@@ -52,9 +76,15 @@
       "name": "List open PRs",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 0],
+      "position": [
+        220,
+        0
+      ],
       "credentials": {
-        "httpHeaderAuth": { "id": "REPLACE_GITHUB_CRED_ID", "name": "GitHub" }
+        "httpHeaderAuth": {
+          "id": "REPLACE_GITHUB_CRED_ID",
+          "name": "GitHub"
+        }
       }
     },
     {
@@ -65,7 +95,10 @@
       "name": "Dedup (skip reviewed sha)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 0]
+      "position": [
+        440,
+        0
+      ]
     },
     {
       "parameters": {
@@ -74,18 +107,33 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Accept", "value": "application/vnd.github.v3.diff" }
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3.diff"
+            }
           ]
         },
-        "options": { "response": { "response": { "responseFormat": "text" } } }
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
       },
       "id": "http-diff-1",
       "name": "Get PR diff",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [660, 0],
+      "position": [
+        660,
+        0
+      ],
       "credentials": {
-        "httpHeaderAuth": { "id": "REPLACE_GITHUB_CRED_ID", "name": "GitHub" }
+        "httpHeaderAuth": {
+          "id": "REPLACE_GITHUB_CRED_ID",
+          "name": "GitHub"
+        }
       }
     },
     {
@@ -106,7 +154,10 @@
       "name": "Prepare request",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [880, 0]
+      "position": [
+        880,
+        0
+      ]
     },
     {
       "parameters": {
@@ -118,7 +169,10 @@
       "name": "Judge note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [1020, -260]
+      "position": [
+        1020,
+        -260
+      ]
     },
     {
       "parameters": {
@@ -133,9 +187,15 @@
       "name": "Review",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1100, 0],
+      "position": [
+        1100,
+        0
+      ],
       "credentials": {
-        "httpHeaderAuth": { "id": "REPLACE_OPENROUTER_CRED_ID", "name": "OpenRouter" }
+        "httpHeaderAuth": {
+          "id": "REPLACE_OPENROUTER_CRED_ID",
+          "name": "OpenRouter"
+        }
       }
     },
     {
@@ -151,9 +211,15 @@
       "name": "Post review comment",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1320, 0],
+      "position": [
+        1320,
+        0
+      ],
       "credentials": {
-        "httpHeaderAuth": { "id": "REPLACE_GITHUB_CRED_ID", "name": "GitHub" }
+        "httpHeaderAuth": {
+          "id": "REPLACE_GITHUB_CRED_ID",
+          "name": "GitHub"
+        }
       }
     },
     {
@@ -164,7 +230,10 @@
       "name": "Build commit status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1540, 0]
+      "position": [
+        1540,
+        0
+      ]
     },
     {
       "parameters": {
@@ -179,9 +248,15 @@
       "name": "Set commit status",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1760, 0],
+      "position": [
+        1760,
+        0
+      ],
       "credentials": {
-        "httpHeaderAuth": { "id": "REPLACE_GITHUB_CRED_ID", "name": "GitHub" }
+        "httpHeaderAuth": {
+          "id": "REPLACE_GITHUB_CRED_ID",
+          "name": "GitHub"
+        }
       }
     },
     {
@@ -192,15 +267,30 @@
       "name": "Build digest",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1980, 0]
+      "position": [
+        1980,
+        0
+      ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "notifydispatch001",
+          "mode": "list",
+          "cachedResultName": "notify - channel adapters (swap point)"
+        },
+        "options": {}
+      },
       "id": "notify-swap-1",
       "name": "Notify (swap point)",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [2200, 0]
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2200,
+        0
+      ]
     },
     {
       "parameters": {
@@ -212,7 +302,10 @@
       "name": "Visibility note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [2100, -240]
+      "position": [
+        2100,
+        -240
+      ]
     },
     {
       "parameters": {
@@ -222,23 +315,138 @@
       "name": "Mark reviewed",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2420, 0]
+      "position": [
+        2420,
+        0
+      ]
     }
   ],
   "connections": {
-    "Schedule Trigger": { "main": [[{ "node": "List open PRs", "type": "main", "index": 0 }]] },
-    "List open PRs": { "main": [[{ "node": "Dedup (skip reviewed sha)", "type": "main", "index": 0 }]] },
-    "Dedup (skip reviewed sha)": { "main": [[{ "node": "Get PR diff", "type": "main", "index": 0 }]] },
-    "Get PR diff": { "main": [[{ "node": "Prepare request", "type": "main", "index": 0 }]] },
-    "Prepare request": { "main": [[{ "node": "Review", "type": "main", "index": 0 }]] },
-    "Review": { "main": [[{ "node": "Post review comment", "type": "main", "index": 0 }]] },
-    "Post review comment": { "main": [[{ "node": "Build commit status", "type": "main", "index": 0 }]] },
-    "Build commit status": { "main": [[{ "node": "Set commit status", "type": "main", "index": 0 }]] },
-    "Set commit status": { "main": [[{ "node": "Build digest", "type": "main", "index": 0 }]] },
-    "Build digest": { "main": [[{ "node": "Notify (swap point)", "type": "main", "index": 0 }]] },
-    "Notify (swap point)": { "main": [[{ "node": "Mark reviewed", "type": "main", "index": 0 }]] }
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "List open PRs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List open PRs": {
+      "main": [
+        [
+          {
+            "node": "Dedup (skip reviewed sha)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup (skip reviewed sha)": {
+      "main": [
+        [
+          {
+            "node": "Get PR diff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get PR diff": {
+      "main": [
+        [
+          {
+            "node": "Prepare request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare request": {
+      "main": [
+        [
+          {
+            "node": "Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review": {
+      "main": [
+        [
+          {
+            "node": "Post review comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post review comment": {
+      "main": [
+        [
+          {
+            "node": "Build commit status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build commit status": {
+      "main": [
+        [
+          {
+            "node": "Set commit status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set commit status": {
+      "main": [
+        [
+          {
+            "node": "Build digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build digest": {
+      "main": [
+        [
+          {
+            "node": "Notify (swap point)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify (swap point)": {
+      "main": [
+        [
+          {
+            "node": "Mark reviewed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "active": false,
   "pinData": {}
 }

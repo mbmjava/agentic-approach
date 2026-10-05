@@ -32,8 +32,9 @@ Only **GitHub** is exercised today; the contract does not change when GitLab is 
 
 - **Judge** — the `Review` node. Agent now; replace it with a human approval step returning the same
   contract. Nothing downstream changes.
-- **Visibility** — the `Notify (swap point)` no-op. The flow emits a neutral event; plug Slack / Teams /
-  email here. **No channel is wired yet.**
+- **Visibility** — `Notify (swap point)` dispatches the neutral event to the **`notify` sub-workflow**
+  (`notify.workflow.json`), which owns the channel adapters (Slack / Webhook / drop). Add a channel there,
+  not in the review flow. **No channel is wired yet.**
 - **Deployment** — later: the same neutral-event pattern feeds a deploy step.
 
 ## Ensemble (experimental)
@@ -46,6 +47,9 @@ parses each `VERDICT`, and merges them in a `Consensus` node.
 - **Models:** for now all three entries are `openai/gpt-6-luna` — **change later** to different families
   for real diversity (author ≠ judge; Claude is intentionally excluded).
 - **Status context** is `n8n-ensemble` (vs `n8n-reviewer` for the single-model variant).
+- **Escalation:** if the judges disagree, the commit status is set to `pending` (not success/failure) and
+  the event is flagged `escalate` with `event: pr-review-escalation`, for the notify adapter to route to a
+  human.
 - **Not wired to a live repo yet:** the experimental copy is pointed at a test repo and left **inactive**.
   The live reviewer is unchanged, and no PRs are exercised yet.
 
@@ -60,7 +64,8 @@ push re-triggers review automatically.
 
 ## Import
 
-1. n8n → **Import from File** → the workflow JSON.
+1. n8n → **Import from File** → the workflow JSON. Import **both** `notify.workflow.json` (channel
+   adapters) and a review workflow (`pr-review.workflow.json` or `pr-review-ensemble.workflow.json`).
 2. Replace `OWNER/REPO` in the List / Get-diff / Comment / Status HTTP nodes.
 3. Create two **Header Auth** credentials and attach them:
    - `GitHub` → header `Authorization: Bearer <token>` (fine-grained PAT: Pull requests read,
