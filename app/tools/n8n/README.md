@@ -91,8 +91,8 @@ each diff, compare to the expected label, and report precision/recall for `reque
 - Corpus is pluggable: the synthetic seed (clean / missing-tests / secret / contract-change / docs-only /
   scope-creep) runs now; point it at real merged-PR history later.
 - Baseline (2026-10-05, `openai/gpt-6-luna`): **precision 1.0, recall 1.0, agreement 6/6, 0 false-approves.**
-- Caveat: on the two genuinely-clean cases the model returned `comment`, not `approve` — so nothing would
-  auto-merge without tuning the prompt or relaxing the approve condition.
+- Clean diffs return `approve` (prompt policy: approve when there are no blockers and no required changes;
+  `comment` only for non-blocking observations) — so the unanimous-approve → auto-merge path can fire.
 
 ## Import
 
