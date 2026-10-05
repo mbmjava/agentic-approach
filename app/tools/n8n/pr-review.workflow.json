@@ -1,17 +1,17 @@
 {
-  "name": "PR review (polling) — opencode/claude reviewer",
+  "name": "PR review (polling) — provider-neutral judge",
   "nodes": [
     {
       "parameters": {
-        "content": "## PR review flow (starting point)\n\nPolling design: n8n cannot receive GitHub webhooks from the public internet at `n8n.localhost`, so this workflow **polls** open PRs on a schedule instead.\n\nFlow: Schedule -> List open PRs -> Get PR diff -> Prepare request -> **Review** -> Post review comment.\n\n**Swap point:** the *Review* node. It calls OpenRouter with the review rubric today. To hand review to a human, replace it with your notification/approval step (Slack, email, or a GitHub review request) and keep the same output contract.\n\nSet OWNER/REPO below, attach credentials (GitHub + OpenRouter), and pick a model matching `.opencode/models.json` (reviewer).",
-        "height": 320,
-        "width": 420
+        "content": "## PR review flow (provider-neutral)\n\nPolling design: n8n cannot receive provider webhooks at `n8n.localhost`, so this workflow **polls** open PRs on a schedule.\n\nFlow: Schedule -> List open PRs -> Dedup -> Get PR diff -> Prepare request -> **Review (judge)** -> Post review comment -> Set commit status -> Build digest -> Notify (swap point) -> Mark reviewed.\n\nThe **judge** is a stable contract: input = diff + PR metadata; output = `VERDICT` / `CHECKLIST` / `FINDINGS`. Any reviewer (agent or human) can fill it.\n\nProvider nodes (List/Get diff/Comment/Status) are the **GitHub adapter**; a GitLab variant mirrors them. Keep the merge **gate** in the provider (branch protection / protected branches), not here.\n\nNo visibility channel is wired yet: `Notify (swap point)` is a no-op that receives a neutral event. Plug Slack/email/deployment there later.",
+        "height": 360,
+        "width": 460
       },
       "id": "sticky-1",
       "name": "Notes",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-40, -320]
+      "position": [-60, -360]
     },
     {
       "parameters": {
@@ -65,7 +65,7 @@
       "name": "Dedup (skip reviewed sha)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [330, 0]
+      "position": [440, 0]
     },
     {
       "parameters": {
@@ -83,7 +83,7 @@
       "name": "Get PR diff",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [440, 0],
+      "position": [660, 0],
       "credentials": {
         "httpHeaderAuth": { "id": "REPLACE_GITHUB_CRED_ID", "name": "GitHub" }
       }
@@ -106,19 +106,19 @@
       "name": "Prepare request",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [660, 0]
+      "position": [880, 0]
     },
     {
       "parameters": {
-        "content": "## SWAP POINT\nReplace this node with a human step (Slack/email/GitHub review request) that returns the same VERDICT/CHECKLIST/FINDINGS contract. Nothing downstream changes.",
+        "content": "## JUDGE — swap point\nReplace this node with a human step (Slack/email/review request) that returns the same `VERDICT` / `CHECKLIST` / `FINDINGS` contract. Nothing downstream changes.",
         "height": 200,
         "width": 320
       },
       "id": "sticky-2",
-      "name": "Swap note",
+      "name": "Judge note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [820, -240]
+      "position": [1020, -260]
     },
     {
       "parameters": {
@@ -133,7 +133,7 @@
       "name": "Review",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [880, 0],
+      "position": [1100, 0],
       "credentials": {
         "httpHeaderAuth": { "id": "REPLACE_OPENROUTER_CRED_ID", "name": "OpenRouter" }
       }
@@ -151,10 +151,68 @@
       "name": "Post review comment",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1100, 0],
+      "position": [1320, 0],
       "credentials": {
         "httpHeaderAuth": { "id": "REPLACE_GITHUB_CRED_ID", "name": "GitHub" }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Map the reviewer verdict to a provider-agnostic outcome.\n// approve/comment -> success; request-changes -> failure (a cited blocker should block).\nconst content = $('Review').item.json.choices[0].message.content || '';\nconst verdictLine = content.split('\\n').find((l) => /VERDICT\\s*:/i.test(l)) || '';\nconst verdict = /request-changes/i.test(verdictLine) ? 'request-changes' : /approve/i.test(verdictLine) ? 'approve' : 'comment';\nconst state = verdict === 'request-changes' ? 'failure' : 'success';\nconst sha = $('List open PRs').item.json.head.sha;\nreturn [{ json: { sha, verdict, body: { state, context: 'n8n-reviewer', description: ('reviewer: ' + verdict).slice(0, 140) } } }];"
+      },
+      "id": "build-status-1",
+      "name": "Build commit status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.github.com/repos/OWNER/REPO/statuses/{{ $json.sha }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {}
+      },
+      "id": "set-status-1",
+      "name": "Set commit status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1760, 0],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REPLACE_GITHUB_CRED_ID", "name": "GitHub" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Emit a PLATFORM-NEUTRAL event. Add channels/deployment at the `Notify (swap point)` node.\nconst pr = $('List open PRs').item.json;\nconst content = $('Review').item.json.choices[0].message.content || '';\nconst lines = content.split('\\n');\nconst verdictLine = lines.find((l) => /VERDICT\\s*:/i.test(l)) || 'VERDICT: (unknown)';\nconst verdict = /request-changes/i.test(verdictLine) ? 'request-changes' : /approve/i.test(verdictLine) ? 'approve' : 'comment';\nconst findings = lines.filter((l) => /^\\s*-\\s*\\[/.test(l)).slice(0, 5).join('\\n');\nconst text = ['PR #' + pr.number + ' ' + pr.title, (pr.user && pr.user.login ? pr.user.login : '') + ' @ ' + String(pr.head.sha).slice(0, 7), 'Verdict: ' + verdict, findings ? 'Findings:\\n' + findings : ''].filter(Boolean).join('\\n');\nreturn [{ json: { channel: 'none', event: 'pr-review', title: 'PR #' + pr.number + ' ' + pr.title, text, url: pr.html_url, verdict, pr: pr.number, sha: pr.head.sha } }];"
+      },
+      "id": "build-digest-1",
+      "name": "Build digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1980, 0]
+    },
+    {
+      "parameters": {},
+      "id": "notify-swap-1",
+      "name": "Notify (swap point)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2200, 0]
+    },
+    {
+      "parameters": {
+        "content": "## VISIBILITY — swap point\nNo-op placeholder. The flow emits a neutral event (`channel, event, title, text, url, meta`).\n\nPlug channels here later (Slack, Teams, email) and, separately, a deployment sink. The review logic does not change. No channel is wired yet.",
+        "height": 240,
+        "width": 340
+      },
+      "id": "sticky-3",
+      "name": "Visibility note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [2100, -240]
     },
     {
       "parameters": {
@@ -164,7 +222,7 @@
       "name": "Mark reviewed",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1320, 0]
+      "position": [2420, 0]
     }
   ],
   "connections": {
@@ -174,7 +232,11 @@
     "Get PR diff": { "main": [[{ "node": "Prepare request", "type": "main", "index": 0 }]] },
     "Prepare request": { "main": [[{ "node": "Review", "type": "main", "index": 0 }]] },
     "Review": { "main": [[{ "node": "Post review comment", "type": "main", "index": 0 }]] },
-    "Post review comment": { "main": [[{ "node": "Mark reviewed", "type": "main", "index": 0 }]] }
+    "Post review comment": { "main": [[{ "node": "Build commit status", "type": "main", "index": 0 }]] },
+    "Build commit status": { "main": [[{ "node": "Set commit status", "type": "main", "index": 0 }]] },
+    "Set commit status": { "main": [[{ "node": "Build digest", "type": "main", "index": 0 }]] },
+    "Build digest": { "main": [[{ "node": "Notify (swap point)", "type": "main", "index": 0 }]] },
+    "Notify (swap point)": { "main": [[{ "node": "Mark reviewed", "type": "main", "index": 0 }]] }
   },
   "settings": { "executionOrder": "v1" },
   "active": false,
