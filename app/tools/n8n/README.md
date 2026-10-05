@@ -62,6 +62,16 @@ Human escalation on judge disagreement is the next step.
 check** in provider branch protection once the judge is calibrated. Dedup is head-sha keyed, so a fix
 push re-triggers review automatically.
 
+## Health / error watcher
+
+`health-error.workflow.json` is an **Error Trigger** workflow: when any workflow fails, it normalises the
+error into the same neutral event (`event: workflow-error`, `escalate: true`) and dispatches it to the
+notify adapter.
+
+- Reference it as the workflow error handler: set it as the instance error workflow (Settings → Error
+  Workflow) or per-workflow via `settings.errorWorkflow`.
+- It must be **published** to be selectable as an error workflow.
+
 ## Import
 
 1. n8n → **Import from File** → the workflow JSON. Import **both** `notify.workflow.json` (channel
