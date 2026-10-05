@@ -63,6 +63,8 @@ For long-running jobs, background the worker so the primary session can continue
 
 An assignment's file list is an important coordination contract, but it is not automatically a tool-level sandbox. Static permissions can restrict broad resource classes or path patterns; they generally cannot infer the exact file list in each new prompt. For strict isolation, use a separate worktree or workspace, or serialize edits and inspect the diff before integration. Never describe a prompt-only instruction as a security guarantee.
 
+**Prefer exact-command allowlists over patterns.** A worker's permitted commands should be named exactly — no glob/prefix patterns, arguments, chaining, pipes, or redirections. Prefix matching is fragile (a leading `*` was observed not to match at all, while a trailing `*` admitted more than intended), so a pattern quietly widens "bounded" as the repo grows. Enumerate the permitted invocations, one per line; when a stack needs a new self-check, add a dedicated no-argument wrapper rather than opening a pattern.
+
 ## Use two verification layers
 
 Workers should self-check within their permitted tools and report the exact command and result. The orchestrator then checks:
@@ -74,7 +76,7 @@ Workers should self-check within their permitted tools and report the exact comm
 
 Self-verification is useful evidence, not a substitute for the integration gate. Report checks that were not run as **not verified**.
 
-In the Tagwell example, workers may use only repository wrappers such as `node scripts/worker-verify.mjs <module> [TestClass]`, documentation checks, and the bounded integration-test runner. The orchestrator serializes build/evaluation work because build output and ports are shared, checks `git status` after each worker pass, and rejects files outside the assignment. Adapt those exact commands to the target repository rather than copying them literally.
+In the Tagwell example, workers may run only an **exact, enumerated** set of repository wrappers — an allowlisted module compile (`node scripts/worker-verify.mjs <module>`), a strict frontend typecheck (`node scripts/frontend-worker-verify.mjs`), `check-docs`, and `code-map` — with no arguments, chaining, or pipes; git stays read-only (`status --short`, `diff`, `log`). The orchestrator serializes builds, checks `git status` after each worker pass, and rejects files outside the assignment. When migrating a typed frontend incrementally, the orchestrator **registers the worker's new file in the shared project** (e.g. `tsconfig.app.json`) *before* delegating the slice, because the no-argument verifier checks that shared project and cannot see an unregistered file. Adapt those exact commands to the target repository rather than copying them literally.
 
 ## Bound expensive or risky operations
 
