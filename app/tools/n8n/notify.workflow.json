@@ -5,7 +5,34 @@
     {
       "parameters": {
         "inputSource": "workflowInputs",
-        "workflowInputs": {},
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "channel",
+              "type": "string"
+            },
+            {
+              "name": "event",
+              "type": "string"
+            },
+            {
+              "name": "escalate",
+              "type": "boolean"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "url",
+              "type": "string"
+            }
+          ]
+        },
         "returnOutput": "lastRunOnly"
       },
       "id": "trigger",

@@ -281,7 +281,18 @@
           "mode": "list",
           "cachedResultName": "notify - channel adapters (swap point)"
         },
-        "options": {}
+        "options": {},
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "channel": "={{ $json.channel }}",
+            "event": "={{ $json.event }}",
+            "escalate": "={{ $json.escalate }}",
+            "title": "={{ $json.title }}",
+            "text": "={{ $json.text }}",
+            "url": "={{ $json.url }}"
+          }
+        }
       },
       "id": "notify-swap-1",
       "name": "Notify (swap point)",
