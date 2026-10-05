@@ -94,6 +94,26 @@ each diff, compare to the expected label, and report precision/recall for `reque
 - Clean diffs return `approve` (prompt policy: approve when there are no blockers and no required changes;
   `comment` only for non-blocking observations) — so the unanimous-approve → auto-merge path can fire.
 
+## Auto-merge
+
+The gate is **provider-side** (GitHub owns it). With auto-merge enabled and branch protection requiring the
+checks, an author opts a PR in with:
+
+```bash
+gh pr merge <n> --auto --squash
+```
+
+GitHub merges when every required check passes. The rule the orchestrator applies:
+
+- **Required checks green** (CI + static analysis) **and the judge status `success`** — add `n8n-reviewer`
+  to the required contexts once a reviewer runs against that repo.
+- **Low blast radius / reversible.** Auto-merge is **opt-in per PR**; never enable it for irreversible or
+  high-impact changes (data migrations, prod cutover, secrets, infra).
+- **No unresolved review threads** (`required_conversation_resolution`).
+
+Applied on `agentic-approach` (auto-merge + branch protection requiring its CI checks). **Not applied to
+Tagwell** until the refactor completes.
+
 ## Import
 
 1. n8n → **Import from File** → the workflow JSON. Import **both** `notify.workflow.json` (channel
