@@ -36,6 +36,19 @@ Tagwell also uses a documentation index to find canonical pages and templates fo
 
 Copy-ready skeletons for the plan, handoff, decision record, and known-issues entry are in [Reusable templates](templates.md).
 
+### Keep the known-issues register tracker-shaped
+
+Accepted limitations and deferred work belong in a **durable register**, never only in a handoff (handoffs are refreshed and superseded). Make it tracker-shaped so it can be imported into a real issue tracker later without rework:
+
+- **Stable ids** — `K<n>`, unique and sequential; never reuse or renumber. The id is the durable reference tied to in-code comments and plans.
+- **A fixed schema per entry** — e.g. `Status` · `Severity` · `Owner` · `Opened` · `Target` · `Impact` · `Where` · `Trigger` · `Next`. Every entry fills every field (use `n/a`), so nothing is silently missing.
+- **Summary table and detail blocks stay in sync** — one row per id, one `### K<n>` block; the two must agree.
+- **Delete when fixed** (Git is the record), rather than paraphrasing to “resolved.” A lingering resolved entry is noise.
+- **Enforce the schema in the docs check** — unique, sequential ids and summary/detail agreement — so the register cannot rot silently.
+- **Route newly evidenced risks here, not only to the handoff.** A risk found during a review or migration goes into the register with its `Trigger`; the handoff links it.
+
+The consistent format is the point: it lets the register survive sessions and later become tickets without translation.
+
 A lifecycle alone does not stop sprawl, though. For how to keep the doc set small and true—budgets, deletion triggers, and guarding against agent-created bloat—see [Prevent documentation bloat](documentation-bloat.md).
 
 ## Cold-start procedure
