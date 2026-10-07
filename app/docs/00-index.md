@@ -32,6 +32,14 @@ Templates (copy-paste skeletons): [handoff](standards/templates/handoff.md),
 
 - [Approval loop](runbooks/approval-loop.md) — run the model-by-default approval loop (fails closed).
 
+## Decisions
+
+- [Decisions (ADRs)](decisions/README.md) — hard-to-reverse choices (`NNNN-title.md`).
+
+## Onboarding
+
+- [Onboarding](onboarding/README.md) — the new-contributor path.
+
 ## Architecture
 
 - [Package layout (hexagonal)](architecture/hexagonal.md) — where a feature's code goes and which way it depends.

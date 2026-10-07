@@ -94,3 +94,6 @@ jobs:
       - name: Agent model source check
         working-directory: app
         run: node scripts/sync-agent-models.mjs --check
+      - name: Harness unit tests
+        working-directory: app
+        run: node --test scripts/worker-shell-guard.test.mjs scripts/known-issues-schema.test.mjs scripts/lib/subagent-policy.test.mjs scripts/watch-opencode-session.test.mjs

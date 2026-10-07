@@ -99,6 +99,18 @@ Give a worker one assignment with a concrete output. Common worker jobs include:
 
 Use fewer roles than the task tempts you to invent. A worker should be differentiated by a stable responsibility or permission boundary, not just a different name.
 
+## Supervise long-running subagents (deadline + stop)
+
+Bounding the loop needs a mechanism, not just a rule. Launch each bounded worker as a **visible**
+subagent, give it a single wall-clock **deadline**, and at expiry **stop that exact run** and confirm it
+reached a terminal state before accepting any output. Design against two failures: an unbounded worker
+that runs forever, and a worker whose late output is accepted after its deadline.
+
+Keep the policy — a default deadline and a stop-confirmation window — in the model/agent configuration, and
+watch the child session with a small script rather than trusting silence. The starter ships
+`scripts/watch-opencode-session.mjs` + `scripts/lib/subagent-policy.mjs` and the `timeouts` block in
+`.opencode/models.json` as a reference implementation; adapt the supervision to your CLI.
+
 ## A repository-specific example
 
 Tagwell uses two fixed worker tiers: `worker` for implementation, critiques, and diagnosis; `worker-xs` for precise mechanical edits. Its root instructions require delegations to use those agents, prohibit worker Git writes, and keep model selection in each agent definition rather than relying on a per-dispatch override. The exact provider and model IDs are configuration choices, not part of the reusable pattern.
