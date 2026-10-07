@@ -12,6 +12,7 @@
 // Exempt from frontmatter: docs/standards/templates/**, working-docs/observability/**.
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, resolve, sep } from 'node:path';
+import { checkKnownIssues } from './lib/known-issues-schema.mjs';
 
 const FM_ROOTS = ['docs', 'working-docs'];
 const LINK_ROOTS = ['docs', 'working-docs'];
@@ -79,21 +80,6 @@ function checkLinks(md, file, errors) {
   }
 }
 
-function checkKnownIssues(errors) {
-  const file = 'docs/architecture/known-issues.md';
-  if (!existsSync(file)) return;
-  const md = readFileSync(file, 'utf8');
-  const summary = new Set();
-  for (const m of md.matchAll(/^\|\s*(K\d+)\s*\|/gm)) {
-    if (summary.has(m[1])) errors.push(`${file}: duplicate id ${m[1]}`);
-    summary.add(m[1]);
-  }
-  const details = new Set();
-  for (const m of md.matchAll(/^###\s+(K\d+)\b/gm)) details.add(m[1]);
-  for (const id of summary) if (!details.has(id)) errors.push(`${file}: summary row ${id} has no detail block`);
-  for (const id of details) if (!summary.has(id)) errors.push(`${file}: detail block ${id} has no summary row`);
-}
-
 const errors = [];
 let checked = 0;
 for (const root of LINK_ROOTS) {
@@ -112,7 +98,10 @@ for (const root of LINK_ROOTS) {
   }
 }
 
-checkKnownIssues(errors);
+const knownIssuesFile = 'docs/architecture/known-issues.md';
+if (existsSync(knownIssuesFile)) {
+  errors.push(...checkKnownIssues(readFileSync(knownIssuesFile, 'utf8'), knownIssuesFile));
+}
 
 console.log(`check-docs: ${checked} governed file(s) checked`);
 if (errors.length) {

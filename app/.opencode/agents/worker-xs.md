@@ -10,19 +10,19 @@ permissions:
     resource: "*"
     effect: deny
   - action: shell
-    resource: "node scripts/check-docs.mjs*"
+    resource: "node scripts/check-docs.mjs"
     effect: allow
   - action: shell
-    resource: "node scripts/code-map.mjs*"
+    resource: "git status --short"
     effect: allow
   - action: shell
-    resource: "git status*"
+    resource: "git diff"
     effect: allow
   - action: shell
-    resource: "git diff*"
+    resource: "git diff --check"
     effect: allow
   - action: shell
-    resource: "git log*"
+    resource: "git log --oneline -10"
     effect: allow
 ---
 
@@ -39,7 +39,8 @@ Hard rules:
 - Write ONLY the files named in the assignment. Never create, delete, or edit anything else.
 - NEVER run git **writes** (add/commit/push/merge) — read-only `git status`, `git diff` and `git log`
   are fine. NEVER run builds, tests, docker, or the app (this tier stays mechanical).
-- You may run `node scripts/check-docs.mjs` / `node scripts/code-map.mjs` to confirm a doc edit.
+- You may run only `node scripts/check-docs.mjs` to confirm a doc edit; the Git read-only commands in
+  the permission list are exact and may not take extra arguments.
 - **Return a unified diff (or exact old/new snippets) of every change; do not restate whole files.**
 - If the instruction is ambiguous, or a match is not unique, STOP and say so in your report instead of
   guessing. A wrong guess is worse than an open question.

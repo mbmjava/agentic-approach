@@ -27,7 +27,7 @@ Use the weakest rung that reliably prevents the mistake; climb a rung when a rul
 **Provider names (the ladder is portable).** “Required CI check” and “branch protection” mean: GitHub →
 rulesets/branch protection with required status checks; GitLab → protected branches with required
 pipelines and MR approval rules. The rung is the same; only the feature name differs. Put the gate in the
-provider, not in a separate orchestrator (an n8n-only reviewer is advisory and cannot block a merge).
+provider, not in the reviewer (a comment-only reviewer is advisory and cannot block a merge).
 
 ## When a required check silently doesn't run
 

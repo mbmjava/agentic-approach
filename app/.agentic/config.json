@@ -1,0 +1,34 @@
+{
+  "forge": {
+    "provider": "github",
+    "repo": "OWNER/REPO"
+  },
+  "rollupBranch": "main",
+  "approval": {
+    "default": "model"
+  },
+  "merge": {
+    "method": "squash"
+  },
+  "labels": {
+    "model": "approve:model",
+    "human": "approve:human",
+    "hold": "approve:hold"
+  },
+  "riskPaths": [
+    "**/security/**",
+    "**/tenancy/**",
+    "**/db/migration/**",
+    "**/pom.xml",
+    "package-lock.json",
+    ".github/workflows/**",
+    ".opencode/**",
+    ".claude/**",
+    ".agentic/**",
+    "scripts/agentic/**",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "docs/standards/**",
+    "working-docs/agent-standards.md"
+  ]
+}

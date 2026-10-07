@@ -17,6 +17,8 @@ path in the [playbook](playbook.md). This page is the full topic index.
 - [Delegate safely](delegate-safely.md) — when parallel work earns its coordination cost.
 - [Independent review](independent-review.md) — a swappable reviewer behind a stable contract.
 
+- [Approval authority](approval-authority.md) — who may approve a change: a forge-neutral policy plus a fail-closed decision.
+
 ## Environment and continuity
 
 - [Productive environment](productive-environment.md) — bounded and observable, without ceremony.

@@ -11,7 +11,7 @@ implementation, code/diff generation, logic critiques, patch/diff reviews, mecha
 
 | Agent | Use for | May run (bounded) |
 | --- | --- | --- |
-| `worker` | reasoned implementation, new code/tests, critiques, diagnosis→patch | `node scripts/worker-verify.mjs <module> [TestClass]`, `node scripts/check-docs.mjs` |
+| `worker` | reasoned implementation, new code/tests, critiques, diagnosis→patch | `node scripts/worker-verify.mjs`, `node scripts/check-docs.mjs` |
 | `worker-xs` | mechanical edits: renames, imports, front-matter, formatting, links/string substitutions | `node scripts/check-docs.mjs` |
 
 Both may write the files they are explicitly told to touch. **Git writes, and the final
@@ -23,7 +23,7 @@ Almost anything stateable in a few sentences with concrete context and acceptanc
 bias: delegate text/file production and diagnosis; keep judgement.** Good fits:
 - **Implement** a scoped change + its tests (`worker`).
 - **Mechanical sweep** — rename/imports/front-matter/links (`worker-xs`).
-- **Diagnose a big artifact** — have the worker read `app/target/eval-report.json` (or logs)
+- **Diagnose a big artifact** — have the worker read the relevant generated report or log
   and return **root-cause buckets + a proposed minimal patch**. This is the highest-token-shift fit for
   the measure→diagnose→fix loop (you stop reading the raw report yourself).
 - **Critique a diff / review for correctness** (`worker`).
@@ -63,11 +63,13 @@ freely over disjoint files.
 
 ## Hard rules
 
-- The worker **never runs git writes** (add/commit/push/merge) — read-only `git status/diff/log` only.
-  The orchestrator owns version control, always.
+- The worker **never runs git writes** (add/commit/push/merge). Read-only Git is limited to the exact
+  commands in its agent file; no extra arguments or shell composition. The orchestrator owns version
+  control, always.
 - The worker never exceeds its named file scope and never decides scope; you judge.
 - The worker never runs `docker`, the app (`scripts/app-*.mjs`), or a foreground server/`mvn` that does
   not exit; only the bounded commands in the tier table.
-- **Shell allowlists match prefix patterns** (`node scripts/<name>*`); a leading `*` did **not** match
-  in testing — that is why worker builds go through `scripts/worker-verify.mjs`, not a raw `mvnw`.
+- **Use exact command allowlists, not prefixes or wildcards.** A wider shell pattern can admit commands
+  the worker was not assigned or that the repository does not provide. The starter exposes only its
+  bounded test wrapper and docs check to `worker`, and only the docs check to `worker-xs`.
 - Fallback if a worker is unavailable: do the bounded work inline and record why in the handoff.

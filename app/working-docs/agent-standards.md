@@ -39,6 +39,14 @@ boundary (git is the history), so every session resumes from the same path. The 
 **Template:** start from [`docs/standards/templates/handoff.md`](../docs/standards/templates/handoff.md).
 Keep the ordered `Next` queue and the explicit stop conditions.
 
+**Resume cold.** Read the handoff as a snapshot, then the living plan for current state and next action.
+Before acting, do read-only recon to confirm the working tree, processes, and environment still match;
+reconcile stale or conflicting notes first. After each meaningful result, update the plan with evidence,
+blockers, and the next action before starting another costly or state-changing step.
+
+**Test recovery.** At least once per wave, have a fresh context or read-only reviewer try to resume using
+only the handoff and plan. Fix any gaps it finds; chat history is not the recovery mechanism.
+
 ## 3. Orchestrator and workers
 
 - The **orchestrator** owns git, integration, and the verification gate. It keeps product judgment and

@@ -24,6 +24,7 @@ from a working setup instead of assembling one by hand.
 | --- | --- |
 | `guide/` | the playbook — plain GitHub-flavored Markdown with relative links |
 | `app/` | the complete, self-contained starter: a blank Maven + React app plus its harness (`.opencode/`, `.claude/`, `scripts/`, `docs/`, `working-docs/`, `tools/`, `.github/`) and its own `AGENTS.md` |
+| `working-docs/` | handoff and plans for maintaining this playbook and starter; may also hold non-actionable adoption references |
 | `scripts/` | repo-level checks for the playbook (link check) |
 | `.github/` | CI for this repo (guide links + the starter's checks) |
 
@@ -32,6 +33,10 @@ from a working setup instead of assembling one by hand.
 Every claim is either a tested lesson or is labelled with its limits (dated estimates, prices, results).
 The playbook follows the practice, not the other way around. See [What this is](guide/what-this-is.md)
 and the [working agreement](guide/working-agreement.md).
+
+This repository owns the framework and its starter, not the application code of projects that adopt or
+inspire it. External repositories are references by default; a current task must explicitly name an
+external target and the requested change before work moves there.
 
 ## Status and limits
 

@@ -76,3 +76,4 @@ The role, collaboration, cost, verification, and recovery principles are tool-ne
 - 2026-10-05 — Known-issues register discipline: tracker-shaped, stable `K<n>` ids, fixed per-entry schema, summary/detail in sync, delete-when-fixed, schema enforced in the docs check.
 - 2026-10-05 — Independent per-slice review for delegated work, and a stack-migration cadence (coverage → tooling → contract-first typing, tighten config last; track progress as a ratio).
 - 2026-10-04 — Enforcement: run static analysis report-first, then gate only the rules with a real hit rate.
+- 2026-10-07 — Retired n8n: the orchestrator (agent session) plus the forge-neutral approval spine is the single control plane (policy, fail-closed decision, reviewer + judge).

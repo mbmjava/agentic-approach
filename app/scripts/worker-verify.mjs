@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 // Bounded self-verification wrapper for workers.
 //
-// Why it exists: a worker's shell allowlist permits only `node scripts/*` wrappers (prefix
-// patterns that reliably match), never a raw `mvnw`, docker or the app. This wrapper compiles the
-// module and optionally runs one focused unit test, with a hard timeout so a stalled build FAILS
-// instead of hanging the worker.
+// Workers are permitted to invoke this wrapper only as the exact no-argument command below; never
+// run raw `mvnw`, docker, or the app. The optional test-class argument is for orchestrator use only.
+// A hard timeout makes a stalled build FAIL instead of hanging the session.
 //
 //   node scripts/worker-verify.mjs [TestClass]
 //
@@ -23,7 +22,7 @@ const goals = testClass ? ['test', `-Dtest=${testClass}`] : ['test'];
 const args = [...goals];
 console.log(`worker-verify: ${goals.join(' ')}`);
 
-// Single quoted command string + shell:true (Node's own recommendation; mirrors run-it.mjs).
+// Single quoted command string; shell:true is required to invoke the Windows .cmd wrapper.
 const quoteArg = (s) => (/[\s"]/.test(s) ? `"${String(s).replace(/"/g, '\\"')}"` : s);
 const commandLine = [wrapper, ...args].map(quoteArg).join(' ');
 const child = spawn(commandLine, { cwd: ROOT, shell: true, stdio: 'inherit' });
