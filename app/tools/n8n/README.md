@@ -4,6 +4,19 @@ When a PR is open, produce an independent review against
 [`docs/standards/review-checklist.md`](../../docs/standards/review-checklist.md), comment it, and set a
 commit status. The **judge** is a stable contract and is swappable — an agent today, a human later.
 
+## Scope: advisor, not the decision
+
+n8n is the **orchestration and visibility** layer: it fetches the diff, runs the reviewer, posts the
+comment/status, dedups by head SHA, and emits neutral events. The **decision** — who may approve a change
+and when a merge is allowed — lives in the forge-neutral policy and the dependency-free code in
+`scripts/agentic/` (`authority.mjs`, `decide.mjs`, `apply.mjs`); see the guide topic
+[Approval authority](../../../guide/approval-authority.md). Keep one source of truth: have this flow
+**call** that decision instead of re-deriving a verdict from a consensus rule.
+
+Naming note: the sub-workflow below is named "judge" but, under the guide's contract, it is a
+**reviewer** (one read-only pass). The separate adversarial `judge` role is the independent second step
+that checks the review plus CI before approval. Do not conflate the two.
+
 n8n runs as `tw-n8n` in the `tw` compose stack, routed at **http://n8n.localhost** (direct:
 http://localhost:5678). Open it once to create the owner account.
 

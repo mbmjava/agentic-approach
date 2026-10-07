@@ -10,25 +10,22 @@ permissions:
     resource: "*"
     effect: deny
   - action: shell
-    resource: "node scripts/check-docs.mjs*"
+    resource: "node scripts/check-docs.mjs"
     effect: allow
   - action: shell
-    resource: "node scripts/code-map.mjs*"
+    resource: "node scripts/worker-verify.mjs"
     effect: allow
   - action: shell
-    resource: "node scripts/run-it.mjs *"
+    resource: "git status --short"
     effect: allow
   - action: shell
-    resource: "node scripts/worker-verify.mjs*"
+    resource: "git diff"
     effect: allow
   - action: shell
-    resource: "git status*"
+    resource: "git diff --check"
     effect: allow
   - action: shell
-    resource: "git diff*"
-    effect: allow
-  - action: shell
-    resource: "git log*"
+    resource: "git log --oneline -10"
     effect: allow
 ---
 
@@ -43,12 +40,10 @@ Hard rules:
 - NEVER run git **writes** (add/commit/push/merge/reset/checkout) — read-only `git status`, `git diff`
   and `git log` are fine. NEVER run docker, the app (`scripts/app-start.mjs` / `app-stop.mjs`), or any
   long-running/server process.
-- **Self-verify with bounded commands only** (never a foreground server/mvn run that does not exit):
-  `node scripts/worker-verify.mjs <module> [TestClass]` (compiles the module, or runs one focused unit
-  test — a bounded wrapper with a hard timeout), `node scripts/check-docs.mjs`,
-  `node scripts/code-map.mjs`, or the bounded live-IT wrapper `node scripts/run-it.mjs <module> <Class>`.
-  Invoke them exactly as written. **Run at most ONE build/eval at a time** (`target/` and ports are
-  shared).
+- **Self-verify with exact bounded commands only:** `node scripts/worker-verify.mjs` (the bounded full
+  test wrapper) or `node scripts/check-docs.mjs`. Read-only Git is limited to the exact commands in the
+  permission list above. No extra arguments, chaining, pipes, or redirections. **Run at most ONE build at
+  a time** (`target/` is shared).
 - **Return a unified diff (or exact old/new snippets) of every change, plus a COMPACT summary** (what
   changed, the test evidence, and — when diagnosing — root-cause buckets). Do not restate whole files
   or paste raw logs.

@@ -71,5 +71,23 @@ jobs:
       - name: Harness parity (agents + skills)
         run: node scripts/check-harness-parity.mjs
 
+      - name: Worker permission guard tests
+        run: node --test scripts/worker-shell-guard.test.mjs scripts/known-issues-schema.test.mjs
+
       - name: Agent model source check
         run: node scripts/sync-agent-models.mjs --check
+
+  agentic-loop:
+    name: Agentic Loop (policy + calibration)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Policy, decision, forge, and calibration tests
+        run: node --test scripts/agentic/*.test.mjs scripts/agentic/forge/*.test.mjs

@@ -11,7 +11,7 @@ large artifacts** (eval reports, logs).
 
 | Agent | Use for | May run (bounded) |
 | --- | --- | --- |
-| `worker` | reasoned implementation, new code/tests, critiques, diagnosis→patch | `node scripts/worker-verify.mjs <module> [TestClass]`, `node scripts/check-docs.mjs` |
+| `worker` | reasoned implementation, new code/tests, critiques, diagnosis→patch | `node scripts/worker-verify.mjs`, `node scripts/check-docs.mjs` |
 | `worker-xs` | mechanical edits: renames, imports, front-matter, formatting, links/string substitutions | `node scripts/check-docs.mjs` |
 
 Models are defined once in `.opencode/models.json` (per harness) and synced into the agent files by
@@ -25,7 +25,7 @@ Almost anything stateable in a few sentences with concrete context and acceptanc
 **Default bias: delegate text/file production and diagnosis; keep judgement.**
 - **Implement** a scoped change + its tests (`worker`).
 - **Mechanical sweep** — rename/imports/front-matter/links (`worker-xs`).
-- **Diagnose a big artifact** — have the worker read `app/target/eval-report.json` (or logs)
+- **Diagnose a big artifact** — have the worker read the relevant generated report or log
   and return **root-cause buckets + a proposed minimal patch**.
 - **Critique a diff / review for correctness** (`worker`).
 
@@ -57,8 +57,9 @@ Never pass a `model` expecting it to apply; the model is fixed by the agent file
 - Rework = re-delegate with the critique; each pass is cheap.
 
 ## Hard rules
-- The worker **never runs git writes** (add/commit/push/merge) — read-only `git status/diff/log` only.
+- The worker **never runs git writes** (add/commit/push/merge). Read-only Git is limited to the exact
+  commands in its agent file; no extra arguments or shell composition.
 - The worker never exceeds its named file scope; you judge.
-- The worker never runs `docker`, the app (`scripts/app-*.mjs`), or a foreground server/`mvn` that does
-  not exit; only the bounded commands in the table above.
+- The worker never runs `docker`, the app, live integration tests, or a foreground server/`mvn` that
+  does not exit; only the bounded commands in the table above.
 - Fallback if a worker is unavailable: do the bounded work inline and record why in the handoff.

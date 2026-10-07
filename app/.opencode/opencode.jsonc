@@ -6,7 +6,9 @@
         { "action": "subagent", "resource": "*", "effect": "deny" },
         { "action": "subagent", "resource": "worker", "effect": "allow" },
         { "action": "subagent", "resource": "worker-xs", "effect": "allow" },
-        { "action": "subagent", "resource": "architecture-reviewer", "effect": "ask" }
+        { "action": "subagent", "resource": "architecture-reviewer", "effect": "ask" },
+        { "action": "subagent", "resource": "pr-reviewer", "effect": "allow" },
+        { "action": "subagent", "resource": "judge", "effect": "allow" }
       ]
     },
     "plan": {
@@ -14,7 +16,9 @@
         { "action": "subagent", "resource": "*", "effect": "deny" },
         { "action": "subagent", "resource": "worker", "effect": "allow" },
         { "action": "subagent", "resource": "worker-xs", "effect": "allow" },
-        { "action": "subagent", "resource": "architecture-reviewer", "effect": "ask" }
+        { "action": "subagent", "resource": "architecture-reviewer", "effect": "ask" },
+        { "action": "subagent", "resource": "pr-reviewer", "effect": "allow" },
+        { "action": "subagent", "resource": "judge", "effect": "allow" }
       ]
     }
   }

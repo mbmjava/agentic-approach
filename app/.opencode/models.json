@@ -8,6 +8,7 @@
     "worker": "worker",
     "worker-xs": "worker-xs",
     "architecture-reviewer": "reviewer",
-    "pr-reviewer": "reviewer"
+    "pr-reviewer": "reviewer",
+    "judge": "reviewer"
   }
 }

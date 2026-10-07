@@ -1,0 +1,29 @@
+[
+  {
+    "id": "clean-change",
+    "repo": "OWNER/REPO",
+    "pr": 1,
+    "head": "REPLACE_WITH_HEAD_SHA",
+    "authority": "model",
+    "expected": "approve",
+    "note": "A correct, tested, in-scope change on a non-risk path. Replace the head SHA and PR with a real merged PR from your history."
+  },
+  {
+    "id": "missing-test",
+    "repo": "OWNER/REPO",
+    "pr": 2,
+    "head": "REPLACE_WITH_HEAD_SHA",
+    "authority": "model",
+    "expected": "request-changes",
+    "note": "New behavior with no test. Calibrate only on real, correctly-labelled heads: the label is the verdict the review record actually required at that head."
+  },
+  {
+    "id": "risk-path-change",
+    "repo": "OWNER/REPO",
+    "pr": 3,
+    "head": "REPLACE_WITH_HEAD_SHA",
+    "authority": "human",
+    "expected": "escalate",
+    "note": "Touches a risk path, so the policy resolves it to human authority and the judge is never consulted for the merge. Score only authority=model cases; this one documents the human-gated side."
+  }
+]

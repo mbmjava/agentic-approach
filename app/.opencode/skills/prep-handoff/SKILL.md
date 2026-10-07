@@ -40,6 +40,8 @@ Any hard-to-reverse choice surfaced this wave becomes an **ADR** in `docs/decisi
 
 ## 5. Verify, then commit
 - Run `node scripts/check-docs.mjs` — frontmatter and relative links must be green.
+- At least once per wave, test a cold resume using only the current handoff and plan (fresh context or
+  read-only reviewer); fix any gaps before closing the wave.
 - Commit as part of the wave (the orchestrator owns git).
 
 ## 6. Hand the user a resume prompt
