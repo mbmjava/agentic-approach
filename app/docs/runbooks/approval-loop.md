@@ -14,7 +14,7 @@ tags: [runbook, agents, approval, forge]
 Run the delivery loop that decides **who approves** a change — model by default, human by toggle — and
 merges only when the deterministic checks and the adversarial judge agree. The orchestrator runs it; the
 scripts in `scripts/agentic/` do the deterministic parts and the subagents (`pr-reviewer`, `judge`) do the
-judgement. n8n (if used) is the orchestration/visibility layer; the decision is the script's.
+judgement. The **orchestrator** (the agent session) is the single control plane; the decision is the script's.
 
 ## Prerequisites
 

@@ -51,7 +51,7 @@ from is a separate reference:
 | `scripts/` | verification and hygiene wrappers |
 | `docs/` | standards, templates, known issues |
 | `working-docs/` | agent standards, handoff, plans, wave log |
-| `tools/` | the PR-review flow (provider gate + n8n advisor) |
+| `tools/` | provider setup for the loop (branch protection, CODEOWNERS) |
 | `.agentic/`, `scripts/agentic/` | the approval loop — policy, fail-closed decision, forge port, calibration (see the [runbook](docs/runbooks/approval-loop.md)) |
 | `.github/` | CI, PR template, CODEOWNERS |
 

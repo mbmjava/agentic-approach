@@ -75,6 +75,6 @@ policy (`config.mjs`), the resolver (`authority.mjs`), the decision (`decide.mjs
 `docs/runbooks/approval-loop.md`. It is CLI- and provider-neutral — swap the forge adapter, keep the
 policy and the contract.
 
-If you already run a neutral orchestrator (e.g. [n8n](https://n8n.io)) for events, comments, and
-visibility, keep it in that role — it should **call this decision**, not re-derive a verdict, so there is
-one source of truth for *who may approve*.
+The **orchestrator** (the agent session) runs the loop and owns the decision; keep **one** source of truth
+for *who may approve*. Do not stand up a separate reviewer service that re-derives a verdict from its own
+consensus rule — call this decision instead.
