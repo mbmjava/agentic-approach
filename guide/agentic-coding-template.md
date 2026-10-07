@@ -40,7 +40,7 @@ For an explicitly exploratory request, brainstorm or prototype without pretendin
 - The orchestrator owns task decomposition, product and technical tradeoffs, contract decisions, integration, quality thresholds, final verification, and acceptance. Bring product choices to the user; do not ask workers to decide what the user wants.
 - When a substantive task is done directly, the orchestrator should know why no worker assignment was more economical; state the reason briefly when it helps the user understand the route.
 - Run the narrowest relevant test first. Expand to module, integration, or full-suite checks when the change's scope and risk justify the added time.
-- Before committing, run the project's fast quality gate—formatting, focused tests, and configured static analysis such as SonarQube—and a diff-focused best-practices/anti-slop review. Look for correctness issues, missing tests, needless complexity or dependencies, dead code, and speculative abstractions. Keep review depth proportional to the change; the orchestrator makes the final accept/rework decision.
+- Before committing, run the project's fast quality gate—formatting, focused tests, and configured static analysis (SonarQube, or the project's analyzer — the starter uses SpotBugs/PMD/Checkstyle) — and a diff-focused best-practices/anti-slop review. Look for correctness issues, missing tests, needless complexity or dependencies, dead code, and speculative abstractions. Keep review depth proportional to the change; the orchestrator makes the final accept/rework decision.
 - Keep persistent instructions concise. Put occasional procedures in skills and recurring prompt shapes in commands instead of injecting a large rulebook into every interaction.
 - Fail loud and bound the loop. Surface errors instead of masking them, and give agents clear stop conditions.
 - Use plans and handoffs for work that spans sessions, not for every small request.
@@ -55,7 +55,7 @@ A small set of skills pays for itself across projects. Add others only when a pr
 - **Visual inspection** — delegate screenshots and images to a vision step; never claim to have seen them.
 - **Evaluation run** — drive the [evaluation harness](templates.md) for a non-deterministic feature.
 
-Keep each skill focused on one responsibility and short; a mega-skill is an [anti-pattern](anti-patterns.md).
+Keep each skill focused on one responsibility and short; a mega-skill is an [anti-pattern](anti-patterns.md). The starter ships four of these — `generate-prd` (spec/PRD), `prep-handoff`, `vision` (visual inspection), and `worker` (assignment/delegation).
 
 ### Minimize wasted context
 

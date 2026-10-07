@@ -12,7 +12,7 @@ Before changing an existing setup, locate and inspect:
 - Worker dispatch patterns, assignment templates, and how each worker can access files and tools.
 - Build, test, app, and container scripts—especially timeouts, output, process cleanup, and side effects.
 - Existing pre-commit quality checks and reviews: formatters, linters, static analysis, focused tests, and any independent anti-slop/code-quality pass.
-- SonarQube/SonarCloud project configuration, CI scan, quality profile, and quality gate, if present.
+- The project's static-analysis / quality-gate configuration (SonarQube/SonarCloud, or e.g. SpotBugs/PMD/Checkstyle), its CI scan, quality profile, and gate, if present.
 - Plans, handoffs, decision records, and scratch notes that influence current behavior.
 - Local state, shared services, generated artifacts, and any production or remote access.
 
