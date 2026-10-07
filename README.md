@@ -24,7 +24,7 @@ from a working setup instead of assembling one by hand.
 | --- | --- |
 | `guide/` | the playbook — plain GitHub-flavored Markdown with relative links |
 | `app/` | the complete, self-contained starter: a blank Maven + React app plus its harness (`.opencode/`, `.claude/`, `scripts/`, `docs/`, `working-docs/`, `tools/`, `.github/`) and its own `AGENTS.md` |
-| `working-docs/` | handoff and plans for maintaining this playbook and starter; may also hold non-actionable adoption references |
+| `working-docs/` | maintenance plans and notes for this playbook and starter; may also hold non-actionable adoption references |
 | `scripts/` | repo-level checks for the playbook (link check) |
 | `.github/` | CI for this repo (guide links + the starter's checks) |
 
