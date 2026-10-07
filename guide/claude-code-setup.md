@@ -42,7 +42,7 @@ Subagents can be given limited tool sets with `tools` or `disallowedTools`. Thes
 ## Skills, permissions, and hooks
 
 - Put reusable procedures in `.claude/skills/<skill-name>/SKILL.md`.
-- Configure tool allow/deny rules and project hooks in `.claude/settings.json`; personal project settings belong in `.claude/settings.local.json`.
+- Configure tool allow/deny rules and project hooks in `.claude/settings.json` (personal settings in `.claude/settings.local.json`); a hook can also be scoped to one agent in that subagent's frontmatter (`hooks:` in `.claude/agents/<name>.md`) — the starter puts its worker shell guard there.
 - Use hooks when a required action must run at a defined tool/lifecycle event. `CLAUDE.md` and subagent prompts guide behavior but are not hard enforcement.
 
 Keep these files concise and non-contradictory. A delegation-first instruction can improve routing reliability, but it cannot guarantee that Claude Code will delegate; monitor whether the orchestrator actually dispatches workers and refine the description or project guidance when it repeatedly fails to do so.

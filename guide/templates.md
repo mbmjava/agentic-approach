@@ -2,6 +2,8 @@
 
 Copy these skeletons into the target project and adjust the paths to match its conventions. They are deliberately short: a template that is hard to fill in stops being used. See [Preserve context](preserve-context.md) for when each one is worth writing.
 
+The starter (`app/docs/standards/templates/`) ships the **plan, handoff, decision, requirement, and runbook** skeletons; the known-issues, enforcement-audit, and evaluation-harness skeletons below are copy-in starting points the starter does not bundle.
+
 ## Living plan
 
 ```md
