@@ -24,6 +24,10 @@ Templates (copy-paste skeletons): [handoff](standards/templates/handoff.md),
 [plan](standards/templates/plan.md), [decision](standards/templates/decision.md),
 [requirement](standards/templates/requirement.md), [runbook](standards/templates/runbook.md).
 
+## Requirements
+
+- [Requirements](requirements/README.md) — where canonical specs live; the spec-driven flow.
+
 ## Runbooks
 
 - [Approval loop](runbooks/approval-loop.md) — run the model-by-default approval loop (fails closed).
