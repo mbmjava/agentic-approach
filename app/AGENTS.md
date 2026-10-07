@@ -63,6 +63,7 @@ from is a separate reference:
 - Static analysis (report-first): `./mvnw verify` runs SpotBugs + FindSecBugs, PMD + CPD, and Checkstyle; see [`docs/standards/static-analysis.md`](docs/standards/static-analysis.md).
 - Frontend: `cd frontend && npm ci && npm run lint && npm run typecheck && npm run test && npm run build`
 - Approval loop: `node --test scripts/agentic/*.test.mjs scripts/agentic/forge/*.test.mjs`
+- Subagent supervision: `node scripts/watch-opencode-session.mjs <child-id> <role> [minutes]`
 
 ## Git and delegation
 

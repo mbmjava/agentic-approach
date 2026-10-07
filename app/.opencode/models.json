@@ -11,5 +11,9 @@
     "pr-reviewer": "reviewer",
     "judge": "reviewer",
     "spec-reviewer": "reviewer"
+  },
+  "timeouts": {
+    "defaultMs": 600000,
+    "stopConfirmationMs": 30000
   }
 }
