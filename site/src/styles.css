@@ -593,6 +593,240 @@ a:focus-visible {
     linear-gradient(180deg, #f5f6f0 0%, #eef1e9 100%);
 }
 
+.guide-overview-hero {
+  background:
+    radial-gradient(ellipse at 85% 18%, rgb(216 250 116 / 22%), transparent 30rem),
+    linear-gradient(180deg, #f5f6f0 0%, #eef1e9 100%);
+}
+
+.overview-badge,
+.roadmap-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgb(87 115 64 / 18%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 70%);
+  padding: 0.5rem 0.75rem;
+  color: #586b4c;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.overview-badge i,
+.rc-lane-stale small i {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: #86ae55;
+}
+
+.guide-step-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.guide-step {
+  min-height: 12rem;
+  border: 1px solid rgb(255 255 255 / 11%);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 4%);
+  padding: 1rem;
+}
+
+.guide-step > span {
+  color: #d8fa74;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+}
+
+.guide-step h3 {
+  margin: 2.2rem 0 0.55rem;
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.guide-step p {
+  margin: 0;
+  color: rgb(255 255 255 / 56%);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.overview-cost-card {
+  border: 1px solid #26352a;
+  border-radius: 1.4rem;
+  background: #16211a;
+  padding: clamp(1rem, 3.5vw, 2rem);
+  box-shadow: 0 22px 55px rgb(24 39 25 / 12%);
+}
+
+.overview-cost-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 0;
+  color: #edf4e4;
+  font-size: clamp(0.78rem, 1.7vw, 1rem);
+  font-weight: 600;
+}
+
+.overview-cost-row + .overview-cost-row { border-top: 1px solid rgb(255 255 255 / 10%); }
+.overview-cost-row b { color: #d8fa74; font-size: 1.2rem; }
+
+.overview-cost-result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 1rem;
+  border-radius: 0.9rem;
+  background: #d8fa74;
+  padding: 1rem;
+  color: #17201a;
+}
+
+.overview-cost-result span { font-size: 0.9rem; font-weight: 750; }
+.overview-cost-result strong { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: clamp(0.65rem, 1.5vw, 0.8rem); }
+
+.roadmap-badge {
+  border-color: #e8d4a4;
+  background: #fff8e8;
+  color: #80622b;
+}
+
+.rc-board {
+  overflow: hidden;
+  border: 1px solid #2a3a2e;
+  border-radius: 1.3rem;
+  background: #121a15;
+  padding: clamp(1rem, 3vw, 1.7rem);
+  color: white;
+  box-shadow: 0 24px 60px rgb(22 34 23 / 12%);
+}
+
+.rc-mainline {
+  display: grid;
+  grid-template-columns: auto minmax(2rem, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  color: #d8fa74;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.rc-mainline i { height: 1px; background: linear-gradient(90deg, #789957, #d8fa74); }
+.rc-main-event { color: #f3d8a1; }
+
+.rc-lane {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) minmax(7.2rem, auto);
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.55rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 0.9rem;
+  background: rgb(255 255 255 / 4%);
+  padding: 0.85rem;
+}
+
+.rc-lane-stale { border-color: rgb(244 189 119 / 32%); background: rgb(244 189 119 / 5%); }
+
+.rc-name {
+  color: #9cc878;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.rc-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.38rem;
+  color: rgb(255 255 255 / 57%);
+  font-size: 0.65rem;
+}
+
+.rc-flow span,
+.rc-flow strong {
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 0.5rem;
+  background: rgb(255 255 255 / 5%);
+  padding: 0.35rem 0.5rem;
+}
+
+.rc-flow strong { border-color: rgb(216 250 116 / 25%); color: #d8fa74; }
+.rc-flow b { color: rgb(255 255 255 / 27%); font-weight: 400; }
+
+.rc-lane small {
+  color: rgb(255 255 255 / 46%);
+  font-size: 0.62rem;
+  line-height: 1.4;
+}
+
+.rc-lane-stale small { display: flex; align-items: center; gap: 0.4rem; color: #f2ca83; }
+.rc-lane-stale small i { flex: none; background: #f2bd62; }
+
+.rc-refresh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.7rem;
+  margin-top: 0.75rem;
+  border-radius: 0.8rem;
+  background: rgb(216 250 116 / 8%);
+  padding: 0.8rem 0.9rem;
+  color: rgb(255 255 255 / 69%);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.rc-refresh strong { color: #d8fa74; }
+
+.topic-card {
+  position: relative;
+  border: 1px solid #e2e8dd;
+  border-radius: 1.15rem;
+  background: #fff;
+  padding: 1.15rem;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.topic-card:hover { transform: translateY(-3px); border-color: #abc28f; box-shadow: 0 16px 36px rgb(23 32 26 / 7%); }
+.topic-card-number { color: #789063; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.64rem; }
+.topic-card h3 { margin: 1rem 0 0.4rem; color: #1a251c; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.035em; }
+.topic-card > p { min-height: 3.2rem; margin: 0; color: #6d7867; font-size: 0.75rem; line-height: 1.55; }
+.topic-card ul { margin: 1rem 0 0; padding: 0; list-style: none; }
+.topic-card li + li { border-top: 1px solid #edf0e9; }
+.topic-card li a { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.55rem 0; color: #4e6244; font-size: 0.72rem; font-weight: 650; }
+.topic-card li a:hover { color: #17201a; }
+.topic-card li a span { color: #92a386; }
+
+@media (max-width: 899px) {
+  .guide-step-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rc-lane { grid-template-columns: 3.5rem minmax(0, 1fr); }
+  .rc-lane small { grid-column: 2; }
+}
+
+@media (max-width: 479px) {
+  .guide-step-grid { grid-template-columns: 1fr; }
+  .guide-step { min-height: auto; }
+  .guide-step h3 { margin-top: 1rem; }
+  .rc-mainline { grid-template-columns: auto minmax(1rem, 1fr) auto; font-size: 0.56rem; }
+  .rc-lane { grid-template-columns: 1fr; }
+  .rc-lane small { grid-column: 1; }
+}
+
 .reader-search {
   width: 100%;
   border: 1px solid #dce3d7;
