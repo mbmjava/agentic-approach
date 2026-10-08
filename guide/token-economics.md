@@ -38,12 +38,11 @@ The following shows how the split could affect API cost for a large project. The
 
 Assume 25% of both input and output tokens go to the orchestrator and 75% to workers. For each scenario, compare the mixed setup with running the **same total token volume** entirely on Sonnet 5:
 
-<table>
-<tr><td>Scenario (total input / output)</td><td>All Sonnet 5</td><td>Mixed orchestrator</td><td>Mixed workers</td><td>Mixed total</td><td>Difference vs. baseline</td></tr>
-<tr><td>Small (1M / 0.2M)</td><td>$4.00</td><td>$0.05</td><td>$0.0945</td><td>$0.1445</td><td>~96.4% lower</td></tr>
-<tr><td>Medium (5M / 1M)</td><td>$20.00</td><td>$0.25</td><td>$0.4725</td><td>$0.7225</td><td>~96.4% lower</td></tr>
-<tr><td>Large (20M / 4M)</td><td>$80.00</td><td>$1.00</td><td>$1.89</td><td>$2.89</td><td>~96.4% lower</td></tr>
-</table>
+| Scenario (total input / output) | All Sonnet 5 | Mixed orchestrator | Mixed workers | Mixed total | Difference vs. baseline |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Small (1M / 0.2M) | $4.00 | $0.05 | $0.0945 | $0.1445 | ~96.4% lower |
+| Medium (5M / 1M) | $20.00 | $0.25 | $0.4725 | $0.7225 | ~96.4% lower |
+| Large (20M / 4M) | $80.00 | $1.00 | $1.89 | $2.89 | ~96.4% lower |
 
 The mixed totals break down as follows:
 
