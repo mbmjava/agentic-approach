@@ -374,6 +374,278 @@ a:focus-visible {
 
 .resource-link-light { color: #d8fa74; }
 
+.cost-equation {
+  background-image: radial-gradient(ellipse at 100% 0%, rgb(216 250 116 / 35%), transparent 45%);
+}
+
+.cost-factor {
+  display: flex;
+  min-height: 5.5rem;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgb(38 55 30 / 9%);
+  border-radius: 0.85rem;
+  background: rgb(255 255 255 / 58%);
+  padding: 0.75rem;
+}
+
+.starter-hero {
+  background:
+    radial-gradient(ellipse at 85% 12%, rgb(216 250 116 / 25%), transparent 28rem),
+    linear-gradient(180deg, #f5f6f0 0%, #eef1e9 100%);
+}
+
+.reader-search {
+  width: 100%;
+  border: 1px solid #dce3d7;
+  border-radius: 0.8rem;
+  background: white;
+  padding: 0.7rem 0.8rem;
+  color: #17201a;
+  font-size: 0.78rem;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.reader-search:focus {
+  border-color: #8eab70;
+  box-shadow: 0 0 0 3px rgb(142 171 112 / 17%);
+}
+
+.reader-nav-link {
+  display: block;
+  border-radius: 0.65rem;
+  padding: 0.48rem 0.65rem;
+  color: #65705f;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  transition: color 130ms ease, background-color 130ms ease;
+}
+
+.reader-nav-link:hover {
+  background: #edf1e8;
+  color: #17201a;
+}
+
+.reader-nav-active {
+  background: #e5efd7;
+  color: #304c27;
+  font-weight: 700;
+}
+
+.reader-mobile-nav > summary::-webkit-details-marker { display: none; }
+.reader-mobile-nav > summary::marker { content: ""; }
+
+.reader-article {
+  min-width: 0;
+  border: 1px solid #e5e9e1;
+  border-radius: 1.3rem;
+  background: #fff;
+  padding: clamp(1.15rem, 4vw, 3.2rem);
+  box-shadow: 0 18px 55px rgb(27 39 27 / 4%);
+}
+
+.markdown-content {
+  max-width: 74ch;
+  color: #39443a;
+  font-size: 0.97rem;
+  line-height: 1.82;
+  overflow-wrap: anywhere;
+}
+
+.markdown-content > :first-child { margin-top: 0; }
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+  color: #18231b;
+  font-weight: 650;
+  line-height: 1.17;
+  letter-spacing: -0.045em;
+  scroll-margin-top: 6rem;
+}
+
+.markdown-content h1 {
+  margin: 0 0 1.5rem;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  letter-spacing: -0.07em;
+}
+
+.markdown-content h2 {
+  margin: 3rem 0 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e8ece4;
+  font-size: clamp(1.55rem, 3.2vw, 2.15rem);
+}
+
+.markdown-content h3 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.35rem;
+}
+
+.markdown-content h4 {
+  margin: 1.5rem 0 0.6rem;
+  font-size: 1.08rem;
+}
+
+.markdown-content p { margin: 1rem 0; }
+.markdown-content strong { color: #202b21; font-weight: 700; }
+
+.markdown-content a {
+  color: #4f7738;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: #a9c28f;
+  text-underline-offset: 0.2em;
+}
+
+.markdown-content a:hover { color: #263e20; text-decoration-color: currentColor; }
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.markdown-content ul { list-style: disc; }
+.markdown-content ol { list-style: decimal; }
+.markdown-content li { margin: 0.42rem 0; padding-left: 0.15rem; }
+.markdown-content li::marker { color: #769757; }
+.markdown-content li > ul,
+.markdown-content li > ol { margin: 0.4rem 0; }
+
+.markdown-content blockquote {
+  margin: 1.5rem 0;
+  border-left: 3px solid #98b875;
+  border-radius: 0 0.8rem 0.8rem 0;
+  background: #f4f7ef;
+  padding: 0.65rem 1rem;
+  color: #53614e;
+}
+
+.markdown-content blockquote > :first-child { margin-top: 0; }
+.markdown-content blockquote > :last-child { margin-bottom: 0; }
+
+.markdown-inline-code,
+.markdown-content :not(pre) > code {
+  border: 1px solid #e8ece4;
+  border-radius: 0.35rem;
+  background: #f3f5f0;
+  padding: 0.1em 0.35em;
+  color: #3f5c31;
+  font-size: 0.87em;
+  overflow-wrap: anywhere;
+}
+
+.markdown-pre {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1.4rem 0;
+  border: 1px solid #253329;
+  border-radius: 0.9rem;
+  background: #17211a;
+  padding: 1.1rem 1.2rem;
+  color: #e0eadc;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+.markdown-pre code {
+  color: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre;
+}
+
+.markdown-content hr {
+  height: 1px;
+  margin: 2rem 0;
+  border: 0;
+  background: #e7ebe3;
+}
+
+.markdown-table {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border: 1px solid #e4e9e0;
+  border-radius: 0.8rem;
+}
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.markdown-content th,
+.markdown-content td {
+  min-width: 8rem;
+  border-bottom: 1px solid #e8ece5;
+  padding: 0.7rem 0.85rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-content th {
+  background: #f4f7f0;
+  color: #354431;
+  font-size: 0.74rem;
+  font-weight: 750;
+}
+
+.markdown-content tr:last-child td { border-bottom: 0; }
+
+.markdown-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+  border: 1px solid #e6ebe1;
+  border-radius: 0.8rem;
+  background: #111914;
+}
+
+.page-turn {
+  display: flex;
+  min-height: 5.2rem;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid #e2e8dd;
+  border-radius: 0.9rem;
+  background: white;
+  padding: 0.85rem 1rem;
+  color: #263328;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.page-turn:hover { transform: translateY(-2px); border-color: #9bb582; }
+.page-turn strong { font-size: 0.88rem; }
+.page-turn-label { color: #73816b; font-size: 0.68rem; font-weight: 700; }
+
+.doc-card {
+  position: relative;
+  display: flex;
+  min-height: 8rem;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid #e3e9de;
+  border-radius: 1rem;
+  background: #f9faf7;
+  padding: 1rem 1.1rem;
+  color: #263328;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.doc-card:hover { transform: translateY(-3px); border-color: #a9bf93; }
+.doc-card > span:first-child { color: #7a8b6d; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+.doc-card strong { max-width: 85%; font-size: 1rem; letter-spacing: -0.025em; }
+.doc-card-arrow { position: absolute; right: 1rem; bottom: 1rem; color: #648347; }
+
 @media (max-width: 639px) {
   .gate-chip {
     flex-direction: column;

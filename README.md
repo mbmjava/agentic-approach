@@ -29,7 +29,7 @@ from a working setup instead of assembling one by hand.
 | Path | What it is |
 | --- | --- |
 | `guide/` | the playbook — plain GitHub-flavored Markdown with relative links |
-| `site/` | the Tailwind-powered landing page, deployed with GitHub Pages |
+| `site/` | the Tailwind-powered public site and reader for the playbook and starter docs, deployed with GitHub Pages |
 | `app/` | the complete, self-contained starter: a blank Maven + React app plus its harness (`.opencode/`, `.claude/`, `scripts/`, `docs/`, `working-docs/`, `tools/`, `.github/`) and its own `AGENTS.md` |
 | `working-docs/` | maintenance plans and notes for this playbook and starter; may also hold non-actionable adoption references |
 | `scripts/` | repo-level checks for the playbook (link check) |

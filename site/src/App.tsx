@@ -1,6 +1,193 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import ReactMarkdown, { type Components } from 'react-markdown';
+import rehypeSlug from 'rehype-slug';
+import remarkGfm from 'remark-gfm';
+import flowSvgUrl from '../../guide/coding-flow.svg?url';
 
 const repoUrl = 'https://github.com/mbmjava/agentic-approach';
+
+type MarkdownModules = Record<string, string>;
+type DocScope = 'guide' | 'starter';
+type SiteDocument = {
+  sourcePath: string;
+  route: string;
+  scope: DocScope;
+  title: string;
+  body: string;
+};
+
+type MarkdownLoader = () => Promise<string>;
+type DocumentEntry = Omit<SiteDocument, 'body'> & { load: MarkdownLoader };
+
+const guideModules = import.meta.glob(['../../guide/*.md', '!../../guide/README.md'], {
+  query: '?raw',
+  import: 'default',
+}) as Record<string, MarkdownLoader>;
+
+const guideIndexModules = import.meta.glob('../../guide/README.md', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+}) as MarkdownModules;
+
+const starterDocModules = import.meta.glob([
+  '../../app/docs/00-index.md',
+  '../../app/docs/architecture/**/*.md',
+  '../../app/docs/onboarding/**/*.md',
+  '../../app/docs/runbooks/**/*.md',
+  '../../app/docs/standards/**/*.md',
+  '../../app/docs/decisions/**/*.md',
+], {
+  query: '?raw',
+  import: 'default',
+}) as Record<string, MarkdownLoader>;
+
+const starterStateModules = import.meta.glob([
+  '../../app/working-docs/agent-standards.md',
+  '../../app/working-docs/plans/README.md',
+], {
+  query: '?raw',
+  import: 'default',
+}) as Record<string, MarkdownLoader>;
+
+function repoPath(modulePath: string) {
+  return modulePath.replaceAll('\\', '/').replace(/^(\.\.\/)+/, '');
+}
+
+function withoutFrontmatter(markdown: string) {
+  return markdown.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
+}
+
+function documentIdentity(sourcePath: string): Pick<SiteDocument, 'route' | 'scope'> | null {
+  const isGuide = sourcePath.startsWith('guide/');
+  const isStarterDoc = sourcePath.startsWith('app/docs/');
+  const isStarterState = sourcePath.startsWith('app/working-docs/');
+  if (!isGuide && !isStarterDoc && !isStarterState) return null;
+  if (sourcePath.startsWith('app/docs/requirements/') && sourcePath !== 'app/docs/requirements/README.md') return null;
+  if (sourcePath === 'app/working-docs/handoff.md' || sourcePath.includes('/observability/')) return null;
+
+  const scope: DocScope = isGuide ? 'guide' : 'starter';
+  let route: string;
+  if (isGuide) {
+    const slug = sourcePath.slice('guide/'.length).replace(/\.md$/, '');
+    route = slug === 'README' ? '/guide' : `/guide/${slug}`;
+  } else if (isStarterDoc) {
+    const slug = sourcePath.slice('app/docs/'.length).replace(/\.md$/, '');
+    route = slug === '00-index' ? '/starter/docs' : `/starter/docs/${slug}`;
+  } else {
+    const slug = sourcePath.slice('app/working-docs/'.length).replace(/\.md$/, '');
+    route = `/starter/working/${slug}`;
+  }
+  return { route, scope };
+}
+
+function makeDocument(sourcePath: string, markdown: string): SiteDocument | null {
+  const identity = documentIdentity(sourcePath);
+  if (!identity) return null;
+  const body = withoutFrontmatter(markdown);
+  const frontmatterTitle = markdown.match(/^title:\s*['"]?(.+?)['"]?\s*$/m)?.[1];
+  const headingTitle = body.match(/^#\s+(.+)$/m)?.[1];
+  const title = frontmatterTitle ?? headingTitle ?? sourcePath.split('/').at(-1)?.replace(/\.md$/, '') ?? 'Guide';
+  return { sourcePath, ...identity, title, body };
+}
+
+function fallbackTitle(sourcePath: string) {
+  const specialTitles: Record<string, string> = {
+    'app/docs/00-index.md': 'Documentation index',
+    'app/docs/onboarding/README.md': 'Onboarding',
+    'app/working-docs/agent-standards.md': 'Agent standards',
+    'app/working-docs/plans/README.md': 'Plans',
+  };
+  if (specialTitles[sourcePath]) return specialTitles[sourcePath];
+  return sourcePath.split('/').at(-1)?.replace(/\.md$/, '').replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()) ?? 'Document';
+}
+
+function makeEntry(modulePath: string, load: MarkdownLoader): DocumentEntry | null {
+  const sourcePath = repoPath(modulePath);
+  const identity = documentIdentity(sourcePath);
+  return identity ? { sourcePath, ...identity, title: fallbackTitle(sourcePath), load } : null;
+}
+
+const rawGuideIndex = Object.entries(guideIndexModules)[0];
+const guideIndexEntry = rawGuideIndex
+  ? makeEntry(rawGuideIndex[0], async () => rawGuideIndex[1])
+  : null;
+const markdownLoaders = [
+  ...Object.entries(guideModules).filter(([path]) => repoPath(path) !== 'guide/README.md'),
+  ...Object.entries(starterDocModules),
+  ...Object.entries(starterStateModules),
+];
+const entries = [
+  ...(guideIndexEntry ? [guideIndexEntry] : []),
+  ...markdownLoaders.flatMap(([path, load]) => {
+    const entry = makeEntry(path, load);
+    return entry ? [entry] : [];
+  }),
+];
+
+const entryByRoute = new Map(entries.map((entry) => [entry.route, entry]));
+const entryBySource = new Map(entries.map((entry) => [entry.sourcePath, entry]));
+
+function resolveRepoPath(sourcePath: string, target: string) {
+  const parts = sourcePath.split('/').slice(0, -1);
+  for (const part of target.replaceAll('\\', '/').split('/')) {
+    if (!part || part === '.') continue;
+    if (part === '..') parts.pop();
+    else parts.push(part);
+  }
+  return parts.join('/');
+}
+
+function guideGroups() {
+  const index = rawGuideIndex?.[1];
+  if (!index) return [];
+  const groups: Array<{ title: string; items: Array<{ title: string; route: string }> }> = [];
+  let current: (typeof groups)[number] | undefined;
+
+  for (const line of withoutFrontmatter(index).split(/\r?\n/)) {
+    const heading = line.match(/^##\s+(.+)/);
+    if (heading) {
+      current = { title: heading[1].trim(), items: [] };
+      groups.push(current);
+      continue;
+    }
+    const link = line.match(/^\s*-\s+\[([^\]]+)\]\(([^)]+\.md)(?:#[^)]*)?\)/);
+    if (!current || !link) continue;
+    const target = resolveRepoPath('guide/README.md', link[2]);
+    const doc = entryBySource.get(target);
+    if (doc) current.items.push({ title: link[1], route: doc.route });
+  }
+
+  const economics = groups.flatMap((group) => group.items.filter((item) => item.route === '/guide/token-economics'));
+  for (const group of groups) group.items = group.items.filter((item) => item.route !== '/guide/token-economics');
+  if (economics.length) groups.unshift({ title: 'Cost & efficiency', items: economics });
+  return [{ title: 'Start here', items: [{ title: 'Guide index', route: '/guide' }] }, ...groups.filter((group) => group.items.length > 0)];
+}
+
+const playbookGroups = guideGroups();
+
+function routeHref(route: string, anchor?: string) {
+  return `#${route}${anchor ? `#${anchor}` : ''}`;
+}
+
+function buildDocGroups(docs: DocumentEntry[]) {
+  const groupOrder = ['architecture', 'onboarding', 'runbooks', 'standards', 'decisions'];
+  const groups = groupOrder.flatMap((folder) => {
+    const items = docs
+      .filter((doc) => doc.scope === 'starter' && doc.route.startsWith(`/starter/docs/${folder}/`))
+      .sort((left, right) => left.title.localeCompare(right.title))
+      .map((doc) => ({ title: doc.title, route: doc.route }));
+    return items.length ? [{ title: folder[0].toUpperCase() + folder.slice(1), items }] : [];
+  });
+  return [{ title: 'Start here', items: [{ title: 'Documentation index', route: '/starter/docs' }] }, ...groups];
+}
+
+function currentLocation() {
+  const hash = window.location.hash;
+  if (!hash.startsWith('#/')) return { route: '/', anchor: undefined };
+  const [route, anchor] = hash.slice(1).split('#', 2);
+  return { route: route.replace(/\/$/, '') || '/', anchor };
+}
 
 function BrandMark() {
   return (
@@ -84,8 +271,8 @@ function WorkflowPreview() {
 
         <figcaption className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4 text-[11px] text-white/45">
           <span>Human intent · bounded execution · evidence before merge</span>
-          <a className="font-semibold text-[#d8fa74] transition hover:text-white" href={`${repoUrl}/blob/main/guide/coding-flow.svg`} target="_blank" rel="noreferrer">
-            View full flow <span aria-hidden="true">↗</span>
+          <a className="font-semibold text-[#d8fa74] transition hover:text-white" href={flowSvgUrl} target="_blank" rel="noreferrer">
+            Open full flow <span aria-hidden="true">↗</span>
           </a>
         </figcaption>
       </figure>
@@ -124,21 +311,22 @@ function ExternalLink({ href, children, className = '' }: { href: string; childr
   return <a className={className} href={href} target="_blank" rel="noreferrer">{children}</a>;
 }
 
-function App() {
+function LandingPage() {
   return (
     <div className="min-h-screen bg-[#f2f4ee] text-[#17201a]">
       <a className="skip-link" href="#main">Skip to content</a>
 
       <header className="relative z-10 border-b border-[#17201a]/[.08]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-4 sm:px-8 lg:px-12">
-          <a className="flex items-center gap-3" href="#top" aria-label="Agentic Approach home">
+          <a className="flex items-center gap-3" href="#/" aria-label="Agentic Approach home">
             <BrandMark />
             <span className="text-sm font-bold tracking-[-.03em]">agentic<span className="font-medium text-[#697365]"> approach</span></span>
           </a>
           <nav className="hidden items-center gap-8 text-sm font-medium text-[#566052] md:flex" aria-label="Main navigation">
             <a className="transition hover:text-[#17201a]" href="#flow">The flow</a>
-            <a className="transition hover:text-[#17201a]" href="#principles">Principles</a>
-            <a className="transition hover:text-[#17201a]" href="#start">Get started</a>
+            <a className="transition hover:text-[#17201a]" href="#/guide">Playbook</a>
+            <a className="transition hover:text-[#17201a]" href="#/guide/token-economics">Cost</a>
+            <a className="transition hover:text-[#17201a]" href="#/starter">Starter</a>
           </nav>
           <details className="mobile-menu relative md:hidden">
             <summary aria-label="Toggle navigation menu" className="grid size-10 cursor-pointer list-none place-items-center rounded-full border border-[#17201a]/15 bg-white/70 text-[#17201a]">
@@ -148,8 +336,9 @@ function App() {
             </summary>
             <nav className="absolute right-0 top-12 z-50 flex min-w-48 flex-col rounded-2xl border border-[#17201a]/10 bg-white p-2 shadow-xl" aria-label="Mobile navigation">
               <a className="rounded-xl px-3 py-2.5 text-sm font-medium text-[#475541] hover:bg-[#f2f4ee]" href="#flow">The flow</a>
-              <a className="rounded-xl px-3 py-2.5 text-sm font-medium text-[#475541] hover:bg-[#f2f4ee]" href="#principles">Principles</a>
-              <a className="rounded-xl px-3 py-2.5 text-sm font-medium text-[#475541] hover:bg-[#f2f4ee]" href="#start">Get started</a>
+              <a className="rounded-xl px-3 py-2.5 text-sm font-medium text-[#475541] hover:bg-[#f2f4ee]" href="#/guide">Playbook</a>
+              <a className="rounded-xl px-3 py-2.5 text-sm font-medium text-[#475541] hover:bg-[#f2f4ee]" href="#/guide/token-economics">Cost &amp; economics</a>
+              <a className="rounded-xl px-3 py-2.5 text-sm font-medium text-[#475541] hover:bg-[#f2f4ee]" href="#/starter">Starter</a>
               <ExternalLink className="rounded-xl px-3 py-2.5 text-sm font-medium text-[#475541] hover:bg-[#f2f4ee]" href={repoUrl}>GitHub ↗</ExternalLink>
             </nav>
           </details>
@@ -183,7 +372,7 @@ function App() {
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <a className="button-primary" href="#flow">See how the flow works <span aria-hidden="true">↓</span></a>
-                <ExternalLink className="button-secondary" href={`${repoUrl}/tree/main/guide`}>Read the playbook <span aria-hidden="true">↗</span></ExternalLink>
+                <a className="button-secondary" href="#/guide">Read the playbook <span aria-hidden="true">→</span></a>
               </div>
               <div className="mt-9 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-[#697466]">
                 <span className="inline-flex items-center gap-2"><span className="tiny-check">✓</span>Tool-neutral core</span>
@@ -228,6 +417,45 @@ function App() {
           </div>
         </section>
 
+        <section id="cost" className="overflow-hidden bg-[#d8fa74] px-5 py-20 sm:px-8 sm:py-24 lg:px-12">
+          <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-center">
+            <div className="max-w-xl">
+              <p className="section-eyebrow text-[#405d2a]">Economics that matter</p>
+              <h2 className="section-heading text-[#17201a]">Cheap tokens aren’t the goal.</h2>
+              <p className="mt-5 text-base leading-7 text-[#3f5038]">
+                Optimize the total cost of an accepted result—not a model call in isolation. Good delegation protects expensive attention and avoids review drag and rework.
+              </p>
+              <a className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-[#21311d] transition hover:gap-3" href="#/guide/token-economics">
+                Explore token economics <span aria-hidden="true">→</span>
+              </a>
+            </div>
+            <div className="cost-equation rounded-[1.5rem] border border-[#28391f]/10 bg-[#f4f7e8] p-5 shadow-[0_24px_70px_rgba(35,54,27,.12)] sm:p-7">
+              <div className="flex items-center justify-between gap-3 border-b border-[#26371e]/10 pb-4">
+                <span className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#657651]">The real unit of value</span>
+                <span className="rounded-full bg-[#17201a] px-3 py-1.5 font-mono text-[10px] font-semibold text-[#d8fa74]">COST / ACCEPTED CHANGE</span>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {[
+                  ['01', 'Model spend'],
+                  ['02', 'Orchestration'],
+                  ['03', 'Review effort'],
+                  ['04', 'Rework'],
+                ].map(([number, label]) => (
+                  <div className="cost-factor" key={number}>
+                    <span className="font-mono text-[10px] text-[#79905f]">{number}</span>
+                    <span className="mt-3 text-xs font-semibold leading-4 text-[#33432d]">{label}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-[#17201a] px-4 py-4 text-white">
+                <span className="text-sm font-semibold">Total cost to accepted work</span>
+                <span className="text-xl font-light text-[#d8fa74]" aria-hidden="true">=</span>
+              </div>
+              <p className="mt-4 text-xs leading-5 text-[#77846a]">Measure quality, latency, and rework together. A cheaper call that needs three rewrites is not cheaper.</p>
+            </div>
+          </div>
+        </section>
+
         <section className="overflow-hidden bg-[#121a15] px-5 py-20 text-white sm:px-8 sm:py-28 lg:px-12">
           <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[.8fr_1.2fr] lg:items-start">
             <div className="max-w-lg">
@@ -236,9 +464,9 @@ function App() {
               <p className="mt-5 text-base leading-7 text-white/60">
                 Don’t jump from “agent can write code” to “agent can ship anything.” Start with evidence, learn where the gates work, then automate only the paths your policy allows.
               </p>
-              <ExternalLink className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#d8fa74] transition hover:text-white" href={`${repoUrl}/blob/main/guide/approval-authority.md`}>
-                Read about approval authority <span aria-hidden="true">↗</span>
-              </ExternalLink>
+              <a className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#d8fa74] transition hover:text-white" href="#/guide/approval-authority">
+                Read about approval authority <span aria-hidden="true">→</span>
+              </a>
             </div>
             <div className="space-y-3">
               {maturity.map((item, index) => (
@@ -267,20 +495,20 @@ function App() {
             </div>
 
             <div className="mt-10 grid gap-4 md:grid-cols-2">
-              <ExternalLink className="resource-card" href={`${repoUrl}/tree/main/guide`}>
+              <a className="resource-card" href="#/guide">
                 <span className="resource-tag">THE PLAYBOOK</span>
                 <span className="resource-arrow" aria-hidden="true">↗</span>
                 <span className="mt-8 block text-2xl font-semibold tracking-[-.05em]">Learn the approach</span>
                 <span className="mt-2 block max-w-md text-sm leading-6 text-[#63705e]">Short, tool-neutral guidance on orchestration, delegation, verification, context, and adoption.</span>
                 <span className="resource-link">Explore the guide <span aria-hidden="true">→</span></span>
-              </ExternalLink>
-              <ExternalLink className="resource-card resource-card-dark" href={`${repoUrl}/tree/main/app`}>
+              </a>
+              <a className="resource-card resource-card-dark" href="#/starter">
                 <span className="resource-tag">THE STARTER</span>
                 <span className="resource-arrow" aria-hidden="true">↗</span>
                 <span className="mt-8 block text-2xl font-semibold tracking-[-.05em]">Start with the harness</span>
                 <span className="mt-2 block max-w-md text-sm leading-6 text-white/55">A blank Maven + React project with agent roles, docs, reusable templates, checks, and CI wired in.</span>
                 <span className="resource-link resource-link-light">Explore the starter <span aria-hidden="true">→</span></span>
-              </ExternalLink>
+              </a>
             </div>
           </div>
         </section>
@@ -295,6 +523,354 @@ function App() {
       </footer>
     </div>
   );
+}
+
+function sourcePathHref(sourcePath: string) {
+  return `${repoUrl}/blob/main/${sourcePath}`;
+}
+
+function resolveMarkdownLink(doc: SiteDocument, href: string) {
+  if (!href || href.startsWith('https:') || href.startsWith('http:') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('//')) {
+    return href || '#';
+  }
+  if (href.startsWith('#')) return routeHref(doc.route, decodeURIComponent(href.slice(1)));
+
+  const [targetPath, targetAnchor] = href.split('#', 2);
+  let targetSource = resolveRepoPath(doc.sourcePath, decodeURIComponent(targetPath));
+  if (targetSource === 'app/working-docs/handoff.md') {
+    targetSource = 'app/docs/standards/templates/handoff.md';
+  }
+  if (targetSource === 'guide/coding-flow.svg') return flowSvgUrl;
+
+  if (targetSource.startsWith('app/docs/requirements/')) return routeHref('/starter');
+  const targetDoc = entryBySource.get(targetSource);
+  if (targetDoc) return routeHref(targetDoc.route, targetAnchor ? decodeURIComponent(targetAnchor) : undefined);
+  return sourcePathHref(targetSource);
+}
+
+function MarkdownBody({ doc }: { doc: SiteDocument }) {
+  const components: Components = {
+    a: ({ href, children, className }) => {
+      const destination = resolveMarkdownLink(doc, href ?? '');
+      const external = destination.startsWith('http');
+      return (
+        <a
+          className={className}
+          href={destination}
+          {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
+        >
+          {children}
+        </a>
+      );
+    },
+    img: ({ src, alt, title }) => {
+      const source = src ? resolveMarkdownLink(doc, src) : undefined;
+      return <img className="markdown-image" src={source} alt={alt ?? ''} title={title} loading="lazy" />;
+    },
+    table: ({ children }) => <div className="markdown-table"><table>{children}</table></div>,
+    pre: ({ children }) => <pre className="markdown-pre">{children}</pre>,
+    code: ({ children, className }) => <code className={className ?? 'markdown-inline-code'}>{children}</code>,
+  };
+
+  return (
+    <div className="markdown-content">
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]} components={components}>
+        {doc.body}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
+function SiteHeader() {
+  return (
+    <header className="sticky top-0 z-30 border-b border-[#17201a]/[.08] bg-[#f5f6f0]/90 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3.5 sm:px-8 lg:px-12">
+        <a className="flex shrink-0 items-center gap-3" href="#/" aria-label="Agentic Approach home">
+          <BrandMark />
+          <span className="text-sm font-bold tracking-[-.03em]">agentic<span className="font-medium text-[#697365]"> approach</span></span>
+        </a>
+        <nav className="hidden items-center gap-6 text-sm font-medium text-[#566052] md:flex" aria-label="Main navigation">
+          <a className="transition hover:text-[#17201a]" href="#/guide">Playbook</a>
+          <a className="transition hover:text-[#17201a]" href="#/guide/token-economics">Cost</a>
+          <a className="transition hover:text-[#17201a]" href="#/starter">Starter</a>
+        </nav>
+        <details className="mobile-menu relative md:hidden">
+          <summary aria-label="Toggle navigation menu" className="grid size-10 cursor-pointer list-none place-items-center rounded-full border border-[#17201a]/15 bg-white/70 text-[#17201a]">
+            <svg viewBox="0 0 20 20" className="size-5" fill="none" aria-hidden="true">
+              <path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+          </summary>
+          <nav className="absolute right-0 top-12 z-50 flex min-w-48 flex-col rounded-2xl border border-[#17201a]/10 bg-white p-2 shadow-xl" aria-label="Mobile navigation">
+            <a className="rounded-xl px-3 py-2.5 text-sm font-medium text-[#475541] hover:bg-[#f2f4ee]" href="#/guide">Playbook</a>
+            <a className="rounded-xl px-3 py-2.5 text-sm font-medium text-[#475541] hover:bg-[#f2f4ee]" href="#/guide/token-economics">Cost &amp; economics</a>
+            <a className="rounded-xl px-3 py-2.5 text-sm font-medium text-[#475541] hover:bg-[#f2f4ee]" href="#/starter">Starter</a>
+          </nav>
+        </details>
+        <ExternalLink className="hidden rounded-full bg-[#17201a] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#304332] sm:inline-flex" href={repoUrl}>
+          Source on GitHub <span aria-hidden="true">↗</span>
+        </ExternalLink>
+      </div>
+    </header>
+  );
+}
+
+function GuideReader({ doc }: { doc: SiteDocument }) {
+  const [query, setQuery] = useState('');
+  const visibleGroups = playbookGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => item.title.toLowerCase().includes(query.toLowerCase())),
+    }))
+    .filter((group) => group.items.length > 0);
+  const orderedDocs = playbookGroups.flatMap((group) => group.items.map((item) => entryByRoute.get(item.route)).filter((item): item is DocumentEntry => Boolean(item)));
+  const currentIndex = orderedDocs.findIndex((item) => item.route === doc.route);
+  const previous = currentIndex > 0 ? orderedDocs[currentIndex - 1] : undefined;
+  const next = currentIndex >= 0 ? orderedDocs[currentIndex + 1] : orderedDocs[0];
+  return <ReaderLayout doc={doc} groups={visibleGroups} query={query} onQuery={setQuery} previous={previous} next={next} />;
+}
+
+function StarterReader({ doc }: { doc: SiteDocument }) {
+  const groups = buildDocGroups(entries);
+  const orderedDocs = groups.flatMap((group) => group.items.map((item) => entryByRoute.get(item.route)).filter((item): item is DocumentEntry => Boolean(item)));
+  const currentIndex = orderedDocs.findIndex((item) => item.route === doc.route);
+  return (
+    <ReaderLayout
+      doc={doc}
+      groups={groups}
+      previous={currentIndex > 0 ? orderedDocs[currentIndex - 1] : undefined}
+      next={currentIndex >= 0 ? orderedDocs[currentIndex + 1] : undefined}
+    />
+  );
+}
+
+function ReaderLayout({
+  doc,
+  groups,
+  query = '',
+  onQuery,
+  previous,
+  next,
+}: {
+  doc: SiteDocument;
+  groups: Array<{ title: string; items: Array<{ title: string; route: string }> }>;
+  query?: string;
+  onQuery?: (value: string) => void;
+  previous?: Pick<SiteDocument, 'title' | 'route'>;
+  next?: Pick<SiteDocument, 'title' | 'route'>;
+}) {
+  const sectionTitle = doc.scope === 'guide' ? 'THE PLAYBOOK' : 'THE STARTER';
+  const source = <ExternalLink className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#577845] transition hover:text-[#17201a]" href={sourcePathHref(doc.sourcePath)}>View source <span aria-hidden="true">↗</span></ExternalLink>;
+  return (
+    <div className="min-h-screen bg-[#f7f8f4] text-[#17201a]">
+      <SiteHeader />
+      <div className="mx-auto max-w-7xl px-5 py-6 sm:px-8 lg:grid lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:gap-14 lg:px-12 lg:py-12">
+        <aside className="hidden lg:block">
+          <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pb-8 pr-2">
+            <a className="mb-6 inline-flex items-center gap-2 text-xs font-semibold text-[#64705f] hover:text-[#17201a]" href={doc.scope === 'guide' ? '#/guide' : '#/starter'}>
+              <span aria-hidden="true">←</span> {doc.scope === 'guide' ? 'Playbook home' : 'Starter overview'}
+            </a>
+            {onQuery && (
+              <label className="mb-6 block">
+                <span className="sr-only">Search playbook topics</span>
+                <input className="reader-search" value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Find a topic…" type="search" />
+              </label>
+            )}
+            <ReaderNav groups={groups} currentRoute={doc.route} />
+          </div>
+        </aside>
+
+        <main className="min-w-0">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#17201a]/10 pb-4 lg:mb-8">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.16em] text-[#829078]">
+              <span>{sectionTitle}</span><span aria-hidden="true">/</span><span className="truncate normal-case tracking-normal text-[#5c6b55]">{doc.title}</span>
+            </div>
+            {source}
+          </div>
+
+          <details className="reader-mobile-nav mb-5 rounded-2xl border border-[#e0e6da] bg-white p-4 lg:hidden">
+            <summary className="cursor-pointer text-sm font-semibold">Browse {doc.scope === 'guide' ? 'the playbook' : 'starter docs'}</summary>
+            <div className="mt-4 max-h-80 overflow-y-auto">
+              {onQuery && <input className="reader-search mb-4" value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Find a topic…" type="search" />}
+              <ReaderNav groups={groups} currentRoute={doc.route} />
+            </div>
+          </details>
+
+          <article className="reader-article">
+            <MarkdownBody doc={doc} />
+          </article>
+
+          {(previous || next) && (
+            <nav className="mt-12 grid gap-3 border-t border-[#17201a]/10 pt-5 sm:grid-cols-2" aria-label="Article navigation">
+              {previous ? (
+                <a className="page-turn" href={routeHref(previous.route)}><span className="page-turn-label">← Previous</span><strong>{previous.title}</strong></a>
+              ) : <span />}
+              {next && <a className="page-turn text-right" href={routeHref(next.route)}><span className="page-turn-label">Next →</span><strong>{next.title}</strong></a>}
+            </nav>
+          )}
+        </main>
+      </div>
+      <ReaderFooter />
+    </div>
+  );
+}
+
+function ReaderNav({ groups, currentRoute }: { groups: Array<{ title: string; items: Array<{ title: string; route: string }> }>; currentRoute: string }) {
+  return (
+    <nav className="space-y-6" aria-label="Documentation topics">
+      {groups.map((group) => (
+        <div key={group.title}>
+          <h2 className="mb-2 px-2 text-[9px] font-extrabold uppercase tracking-[.17em] text-[#929d89]">{group.title}</h2>
+          <ul className="space-y-0.5">
+            {group.items.map((item) => (
+              <li key={item.route}>
+                <a
+                  className={`reader-nav-link ${item.route === currentRoute ? 'reader-nav-active' : ''}`}
+                  href={routeHref(item.route)}
+                  aria-current={item.route === currentRoute ? 'page' : undefined}
+                >
+                  {item.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+function StarterOverview() {
+  const featuredDocs = [
+    ['Architecture', 'Hexagonal package layout', '/starter/docs/architecture/hexagonal'],
+    ['Runbook', 'Approval loop', '/starter/docs/runbooks/approval-loop'],
+    ['Standards', 'Review checklist', '/starter/docs/standards/review-checklist'],
+  ];
+  return (
+    <div className="min-h-screen bg-[#f2f4ee] text-[#17201a]">
+      <SiteHeader />
+      <main>
+        <section className="starter-hero px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
+          <div className="mx-auto max-w-7xl">
+            <p className="section-eyebrow">The starter</p>
+            <h1 className="max-w-4xl text-[clamp(3rem,7vw,5.8rem)] font-semibold leading-[.96] tracking-[-.075em]">Start with a working harness.</h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5d6958]">A blank Maven + React project with agent roles, project docs, reusable handoffs, verification scripts, and CI ready to adapt to your product.</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <ExternalLink className="button-primary" href={`${repoUrl}/tree/main/app`}>Get the starter source <span aria-hidden="true">↗</span></ExternalLink>
+              <a className="button-secondary" href="#/starter/docs">Browse starter docs <span aria-hidden="true">→</span></a>
+            </div>
+          </div>
+        </section>
+        <section className="bg-white px-5 py-16 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-4 md:grid-cols-3">
+              {[
+                ['01', 'Agent harness', 'OpenCode and Claude Code adapters, bounded worker roles, and explicit permission boundaries.'],
+                ['02', 'Verification', 'Fast focused checks, static analysis, docs validation, and a CI baseline.'],
+                ['03', 'State that resumes', 'One handoff per wave and one living plan per active workstream.'],
+              ].map(([number, title, copy]) => (
+                <article className="principle-card" key={number}>
+                  <span className="principle-number">{number}</span>
+                  <h2 className="mt-10 text-xl font-semibold tracking-[-.04em]">{title}</h2>
+                  <p className="mt-3 text-sm leading-6 text-[#667064]">{copy}</p>
+                </article>
+              ))}
+            </div>
+            <div className="mt-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+              <div>
+                <p className="section-eyebrow">Read the template docs</p>
+                <h2 className="section-heading">Built to adapt, not copy blindly.</h2>
+              </div>
+              <a className="inline-flex items-center gap-2 text-sm font-bold text-[#52753a] hover:text-[#17201a]" href="#/starter/docs">Browse all starter docs <span aria-hidden="true">→</span></a>
+            </div>
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {featuredDocs.map(([kind, title, route]) => (
+                <a className="doc-card" href={routeHref(route)} key={route}>
+                  <span>{kind}</span><strong>{title}</strong><span className="doc-card-arrow" aria-hidden="true">↗</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+      <ReaderFooter />
+    </div>
+  );
+}
+
+function ReaderFooter() {
+  return (
+    <footer className="border-t border-[#17201a]/10 bg-[#f2f4ee] px-5 py-6 sm:px-8 lg:px-12">
+      <div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 text-xs text-[#71806a] sm:flex-row sm:items-center">
+        <a className="font-semibold text-[#283728]" href="#/">Agentic Approach</a>
+        <span>Source content stays canonical in the repository.</span>
+        <ExternalLink className="font-semibold hover:text-[#17201a]" href={repoUrl}>View source on GitHub ↗</ExternalLink>
+      </div>
+    </footer>
+  );
+}
+
+function App() {
+  const [location, setLocation] = useState(currentLocation);
+  const [loadedDocument, setLoadedDocument] = useState<{ route: string; doc: SiteDocument | null }>({ route: '', doc: null });
+  const entry = entryByRoute.get(location.route);
+
+  useEffect(() => {
+    const updateLocation = () => setLocation(currentLocation());
+    window.addEventListener('hashchange', updateLocation);
+    return () => window.removeEventListener('hashchange', updateLocation);
+  }, []);
+
+  useEffect(() => {
+    let current = true;
+    if (!entry) {
+      setLoadedDocument({ route: location.route, doc: null });
+      return () => { current = false; };
+    }
+    entry.load().then((markdown) => {
+      if (current) setLoadedDocument({ route: location.route, doc: makeDocument(entry.sourcePath, markdown) });
+    }).catch(() => {
+      if (current) setLoadedDocument({ route: location.route, doc: null });
+    });
+    return () => { current = false; };
+  }, [entry, location.route]);
+
+  useEffect(() => {
+    if (location.route === '/') {
+      window.scrollTo(0, 0);
+      return;
+    }
+    requestAnimationFrame(() => {
+      if (location.anchor) {
+        document.getElementById(decodeURIComponent(location.anchor))?.scrollIntoView({ block: 'start' });
+      } else {
+        window.scrollTo(0, 0);
+      }
+    });
+  }, [location.route, location.anchor]);
+
+  useEffect(() => {
+    const doc = loadedDocument.route === location.route ? loadedDocument.doc : null;
+    document.title = doc ? `${doc.title} · Agentic Approach` : location.route === '/starter' ? 'Starter · Agentic Approach' : 'Agentic Approach — Work with agents, keep control';
+  }, [location.route, loadedDocument]);
+
+  if (location.route === '/starter') return <StarterOverview />;
+  const doc = loadedDocument.route === location.route ? loadedDocument.doc : null;
+  if (doc?.scope === 'guide') return <GuideReader doc={doc} />;
+  if (doc?.scope === 'starter') return <StarterReader doc={doc} />;
+  if (location.route.startsWith('/guide') || location.route.startsWith('/starter/docs')) {
+    if (entry && loadedDocument.route !== location.route) {
+      return <div className="doc-loading"><SiteHeader /><div className="loading-card"><span className="loading-mark" /><p>Loading the guide…</p></div></div>;
+    }
+    return (
+      <div className="min-h-screen bg-[#f7f8f4] px-6 py-20 text-center">
+        <SiteHeader />
+        <h1 className="mt-12 text-4xl font-semibold tracking-[-.06em]">That page isn’t in this edition.</h1>
+        <p className="mt-3 text-[#697466]">The playbook and starter pages are generated from the current repository content.</p>
+        <a className="button-primary mt-8" href="#/guide">Open the guide index</a>
+      </div>
+    );
+  }
+  return <LandingPage />;
 }
 
 export default App;
