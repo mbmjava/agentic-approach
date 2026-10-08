@@ -1,0 +1,395 @@
+@import "tailwindcss";
+
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #17201a;
+  background: #f2f4ee;
+  font-optical-sizing: auto;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 1.5rem;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+}
+
+::selection {
+  color: #17201a;
+  background: #d8fa74;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:focus-visible {
+  outline: 3px solid #70a64c;
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  z-index: 100;
+  top: 0.75rem;
+  left: 0.75rem;
+  transform: translateY(-150%);
+  border-radius: 999px;
+  background: #17201a;
+  padding: 0.75rem 1rem;
+  color: white;
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.mobile-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-menu > summary::marker {
+  content: "";
+}
+
+.hero-shell {
+  background:
+    radial-gradient(ellipse at 87% 24%, rgb(216 250 116 / 18%), transparent 28rem),
+    linear-gradient(180deg, #f5f6f0 0%, #eef1e9 100%);
+}
+
+.hero-grid {
+  background-image: linear-gradient(rgb(29 52 37 / 3%) 1px, transparent 1px), linear-gradient(90deg, rgb(29 52 37 / 3%) 1px, transparent 1px);
+  background-position: center top;
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black, transparent 80%);
+}
+
+.hero-underline {
+  position: absolute;
+  right: -0.06em;
+  bottom: -0.03em;
+  left: -0.04em;
+  z-index: -1;
+  height: 0.19em;
+  transform: rotate(-1.5deg);
+  border-radius: 99px;
+  background: #d8fa74;
+}
+
+.button-primary,
+.button-secondary {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border-radius: 999px;
+  padding: 0.75rem 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 650;
+  transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.button-primary {
+  background: #17201a;
+  color: white;
+  box-shadow: 0 7px 18px rgb(20 32 24 / 12%);
+}
+
+.button-primary:hover {
+  transform: translateY(-2px);
+  background: #304332;
+  box-shadow: 0 10px 24px rgb(20 32 24 / 17%);
+}
+
+.button-secondary {
+  border: 1px solid rgb(23 32 26 / 14%);
+  background: rgb(255 255 255 / 55%);
+  color: #263328;
+}
+
+.button-secondary:hover {
+  transform: translateY(-2px);
+  background: white;
+}
+
+.tiny-check {
+  display: inline-grid;
+  width: 1rem;
+  height: 1rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #dcebc8;
+  color: #496d36;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.workflow-panel {
+  background-image: radial-gradient(ellipse at 50% -18%, rgb(216 250 116 / 11%), transparent 58%);
+}
+
+.flow-node {
+  display: flex;
+  min-height: 110px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 1rem;
+  border-width: 1px;
+  padding: 0.9rem 1rem;
+}
+
+.flow-node strong {
+  font-size: 1rem;
+  letter-spacing: -0.025em;
+}
+
+.flow-kicker {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.flow-caption {
+  color: rgb(255 255 255 / 47%);
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.worker-lane {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.65rem;
+  border-radius: 0.75rem;
+  background: rgb(255 255 255 / 4%);
+  padding: 0.65rem 0.7rem;
+}
+
+.worker-lane strong,
+.worker-lane small {
+  display: block;
+}
+
+.worker-lane strong {
+  overflow: hidden;
+  color: rgb(255 255 255 / 82%);
+  font-size: 0.68rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.worker-lane small {
+  margin-top: 0.18rem;
+  color: rgb(255 255 255 / 39%);
+  font-size: 0.62rem;
+}
+
+.worker-dot {
+  margin-top: 0.2rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  flex: none;
+  border-radius: 50%;
+}
+
+.gate-chip {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 0.8rem;
+  background: rgb(255 255 255 / 4%);
+  padding: 0.7rem 0.65rem;
+  color: rgb(255 255 255 / 70%);
+  font-size: clamp(0.58rem, 1.3vw, 0.7rem);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gate-final {
+  border-color: rgb(244 189 119 / 20%);
+  background: rgb(244 189 119 / 6%);
+}
+
+.gate-icon {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.section-eyebrow {
+  margin: 0 0 0.85rem;
+  color: #60764b;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.section-heading {
+  max-width: 15ch;
+  font-size: clamp(2.4rem, 5vw, 4.25rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.07em;
+}
+
+.principle-card {
+  min-height: 17.5rem;
+  border: 1px solid #e4e9df;
+  border-radius: 1.25rem;
+  background: #fafbf8;
+  padding: 1.35rem;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.principle-card:hover {
+  transform: translateY(-4px);
+  border-color: #cdd8c2;
+  box-shadow: 0 18px 45px rgb(23 32 26 / 7%);
+}
+
+.principle-number {
+  color: #778371;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+}
+
+.principle-mark {
+  display: grid;
+  width: 2.1rem;
+  height: 2.1rem;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 0.9rem;
+}
+
+.principle-mint .principle-mark { background: #dcf1e9; color: #347d66; }
+.principle-lime .principle-mark { background: #eaf4d4; color: #557b32; }
+.principle-blue .principle-mark { background: #e2ebf8; color: #54739e; }
+
+.maturity-row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  align-items: start;
+  gap: 1rem;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 3%);
+  padding: 1.2rem;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.maturity-row:hover {
+  border-color: rgb(216 250 116 / 25%);
+  background: rgb(255 255 255 / 6%);
+}
+
+.maturity-id {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 0.7rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.maturity-id-0 { background: #d8fa74; color: #17201a; }
+.maturity-id-1 { background: #70e0c0; color: #17201a; }
+.maturity-id-2 { background: #8ab8ff; color: #17201a; }
+
+.resource-card {
+  position: relative;
+  display: block;
+  min-height: 18rem;
+  overflow: hidden;
+  border: 1px solid #d9e1d2;
+  border-radius: 1.5rem;
+  background: #f8faf4;
+  padding: 1.6rem;
+  color: #17201a;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.resource-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 55px rgb(28 42 29 / 11%);
+}
+
+.resource-card-dark {
+  border-color: #26372b;
+  background: #17221a;
+  color: white;
+}
+
+.resource-tag {
+  color: #687663;
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+}
+
+.resource-card-dark .resource-tag { color: #bfe66a; }
+
+.resource-arrow {
+  position: absolute;
+  top: 1.35rem;
+  right: 1.45rem;
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  place-items: center;
+  border: 1px solid #d9e1d2;
+  border-radius: 50%;
+  color: #475541;
+  transition: transform 180ms ease;
+}
+
+.resource-card:hover .resource-arrow { transform: rotate(45deg); }
+.resource-card-dark .resource-arrow { border-color: rgb(255 255 255 / 17%); color: #d8fa74; }
+
+.resource-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.6rem;
+  color: #41652e;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.resource-link-light { color: #d8fa74; }
+
+@media (max-width: 639px) {
+  .gate-chip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

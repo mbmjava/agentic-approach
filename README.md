@@ -6,6 +6,8 @@ The playbook (`guide/`) extracts what actually works in real projects, generaliz
 complete starter (`app/`) that already has the workflow, agents, checks, and CI wired — so you start
 from a working setup instead of assembling one by hand.
 
+**[Visit the website](https://mbmjava.github.io/agentic-approach/)** · [Explore the playbook](guide/README.md) · [Use the starter](app/)
+
 ![From idea to merge: user and orchestrator frame the work, bounded workers implement, then local checks, a pull request, CI, independent review, a judge, and a policy-based merge gate.](guide/coding-flow.svg)
 
 [Open or download the workflow visual](guide/coding-flow.svg).
@@ -27,6 +29,7 @@ from a working setup instead of assembling one by hand.
 | Path | What it is |
 | --- | --- |
 | `guide/` | the playbook — plain GitHub-flavored Markdown with relative links |
+| `site/` | the Tailwind-powered landing page, deployed with GitHub Pages |
 | `app/` | the complete, self-contained starter: a blank Maven + React app plus its harness (`.opencode/`, `.claude/`, `scripts/`, `docs/`, `working-docs/`, `tools/`, `.github/`) and its own `AGENTS.md` |
 | `working-docs/` | maintenance plans and notes for this playbook and starter; may also hold non-actionable adoption references |
 | `scripts/` | repo-level checks for the playbook (link check) |
