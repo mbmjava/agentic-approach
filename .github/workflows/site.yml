@@ -4,11 +4,19 @@ on:
   pull_request:
     paths:
       - 'site/**'
+      - 'guide/**'
+      - 'app/docs/**'
+      - 'app/working-docs/agent-standards.md'
+      - 'app/working-docs/plans/README.md'
       - '.github/workflows/site.yml'
   push:
     branches: [main]
     paths:
       - 'site/**'
+      - 'guide/**'
+      - 'app/docs/**'
+      - 'app/working-docs/agent-standards.md'
+      - 'app/working-docs/plans/README.md'
       - '.github/workflows/site.yml'
   workflow_dispatch:
 
