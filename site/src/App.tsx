@@ -36,6 +36,7 @@ const starterDocModules = import.meta.glob([
   '../../app/docs/onboarding/**/*.md',
   '../../app/docs/runbooks/**/*.md',
   '../../app/docs/standards/**/*.md',
+  '../../app/docs/requirements/README.md',
   '../../app/docs/decisions/**/*.md',
 ], {
   query: '?raw',
@@ -542,7 +543,9 @@ function resolveMarkdownLink(doc: SiteDocument, href: string) {
   }
   if (targetSource === 'guide/coding-flow.svg') return flowSvgUrl;
 
-  if (targetSource.startsWith('app/docs/requirements/')) return routeHref('/starter');
+  if (targetSource.startsWith('app/docs/requirements/') && targetSource !== 'app/docs/requirements/README.md') {
+    return sourcePathHref(targetSource);
+  }
   const targetDoc = entryBySource.get(targetSource);
   if (targetDoc) return routeHref(targetDoc.route, targetAnchor ? decodeURIComponent(targetAnchor) : undefined);
   return sourcePathHref(targetSource);
