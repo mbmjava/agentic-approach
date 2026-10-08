@@ -378,6 +378,204 @@ a:focus-visible {
   background-image: radial-gradient(ellipse at 100% 0%, rgb(216 250 116 / 35%), transparent 45%);
 }
 
+.cost-comparison-visual {
+  margin: 2rem 0;
+  border: 1px solid #253329;
+  border-radius: 1.3rem;
+  background:
+    radial-gradient(ellipse at 95% 0%, rgb(216 250 116 / 12%), transparent 24rem),
+    #17211a;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  color: white;
+}
+
+.cost-visual-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+  padding-bottom: 1rem;
+}
+
+.markdown-content .cost-visual-heading h2 {
+  margin: 0.4rem 0 0;
+  border: 0;
+  padding: 0;
+  color: white;
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  letter-spacing: -0.055em;
+}
+
+.cost-visual-kicker {
+  color: #d8fa74;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.cost-assumption {
+  border: 1px solid rgb(216 250 116 / 20%);
+  border-radius: 999px;
+  background: rgb(216 250 116 / 7%);
+  padding: 0.4rem 0.65rem;
+  color: #e0f3bc;
+  font-size: 0.65rem;
+  font-weight: 650;
+}
+
+.cost-scenario-grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.cost-scenario-card {
+  min-width: 0;
+  border: 1px solid #e5eadf;
+  border-radius: 0.95rem;
+  background: #f8faf4;
+  padding: 0.9rem;
+  color: #253126;
+}
+
+.cost-scenario-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.cost-scenario-label {
+  color: #253126;
+  font-size: 0.92rem;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+
+.markdown-content .cost-scenario-top p {
+  margin: 0.16rem 0 0;
+  color: #7b8677;
+  font-size: 0.62rem;
+  line-height: 1.35;
+}
+
+.cost-scenario-top p span { color: #929b8e; }
+
+.cost-savings {
+  flex: none;
+  border-radius: 999px;
+  background: #e6f4d3;
+  padding: 0.3rem 0.45rem;
+  color: #47702f;
+  font-size: 0.58rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.cost-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+  color: #71806c;
+  font-size: 0.65rem;
+}
+
+.cost-price-row strong {
+  color: #39443a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.74rem;
+  font-weight: 750;
+}
+
+.cost-mixed-row { margin-top: 0.8rem; }
+.cost-mixed-row strong { color: #456f31; font-size: 0.94rem; }
+
+.cost-track {
+  height: 0.35rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7ebe2;
+}
+
+.cost-track-fill {
+  display: block;
+  height: 100%;
+  min-width: 0.28rem;
+  border-radius: inherit;
+}
+
+.cost-baseline-fill { background: #9da89a; }
+.cost-mixed-fill { background: linear-gradient(90deg, #82ae4f, #c1e975); }
+
+.cost-role-breakdown {
+  margin-top: 1rem;
+  border-top: 1px solid #e5e9df;
+  padding-top: 0.8rem;
+}
+
+.cost-role-bar {
+  display: flex;
+  height: 0.42rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5eadf;
+}
+
+.cost-role-orchestrator { background: #7d9f58; }
+.cost-role-workers { background: #b4d66b; }
+
+.cost-role-legend {
+  display: grid;
+  gap: 0.32rem;
+  margin-top: 0.6rem;
+}
+
+.cost-role-legend span {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #717d6c;
+  font-size: 0.6rem;
+}
+
+.cost-role-legend strong {
+  margin-left: auto;
+  color: #39443a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.62rem;
+}
+
+.cost-role-legend i {
+  width: 0.42rem;
+  height: 0.42rem;
+  flex: none;
+  border-radius: 50%;
+}
+
+.legend-orchestrator { background: #7d9f58; }
+.legend-workers { background: #b4d66b; }
+
+.markdown-content .cost-visual-footnote {
+  margin: 0.85rem 0 0;
+  color: rgb(255 255 255 / 48%);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+@media (min-width: 620px) {
+  .cost-scenario-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 900px) {
+  .cost-scenario-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
 .cost-factor {
   display: flex;
   min-height: 5.5rem;
