@@ -575,12 +575,125 @@ function MarkdownBody({ doc }: { doc: SiteDocument }) {
     code: ({ children, className }) => <code className={className ?? 'markdown-inline-code'}>{children}</code>,
   };
 
+  const comparison = doc.sourcePath === 'guide/token-economics.md' ? extractCostComparison(doc.body) : null;
+
   return (
     <div className="markdown-content">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]} components={components}>
-        {doc.body}
-      </ReactMarkdown>
+      {comparison ? (
+        <>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]} components={components}>
+            {comparison.before}
+          </ReactMarkdown>
+          <CostComparisonVisual rows={comparison.rows} />
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]} components={components}>
+            {comparison.after}
+          </ReactMarkdown>
+        </>
+      ) : (
+        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]} components={components}>
+          {doc.body}
+        </ReactMarkdown>
+      )}
     </div>
+  );
+}
+
+type CostRow = {
+  scenario: string;
+  volume: string;
+  baseline: string;
+  orchestrator: string;
+  workers: string;
+  mixed: string;
+  savings: string;
+};
+
+function parsePipeRow(line: string) {
+  return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim());
+}
+
+function extractCostComparison(markdown: string) {
+  const lines = markdown.split(/\r?\n/);
+  const start = lines.findIndex((line) => line.includes('| Scenario (total input / output) |'));
+  if (start < 0) return null;
+  let end = start;
+  while (end < lines.length && lines[end].trim().startsWith('|')) end += 1;
+  const rows = lines.slice(start, end).map(parsePipeRow);
+  const dataRows = rows.slice(2);
+  if (!dataRows.length || dataRows.some((row) => row.length !== 6)) return null;
+
+  return {
+    before: lines.slice(0, start).join('\n'),
+    after: lines.slice(end).join('\n'),
+    rows: dataRows.map((row) => {
+      const match = row[0].match(/^(.+?)\s+\((.+)\)$/);
+      return {
+        scenario: match?.[1] ?? row[0],
+        volume: match?.[2] ?? '',
+        baseline: row[1],
+        orchestrator: row[2],
+        workers: row[3],
+        mixed: row[4],
+        savings: row[5],
+      } satisfies CostRow;
+    }),
+  };
+}
+
+function amount(value: string) {
+  return Number(value.replace(/[$,]/g, ''));
+}
+
+function CostComparisonVisual({ rows }: { rows: CostRow[] }) {
+  return (
+    <section className="cost-comparison-visual" aria-label="Illustrative token cost comparison">
+      <div className="cost-visual-heading">
+        <div>
+          <span className="cost-visual-kicker">Illustrative API spend</span>
+          <h2>Same token volume.<br />Different routing.</h2>
+        </div>
+        <span className="cost-assumption">25% orchestrator · 75% workers</span>
+      </div>
+      <div className="cost-scenario-grid">
+        {rows.map((row) => {
+          const baseline = amount(row.baseline);
+          const mixed = amount(row.mixed);
+          const orchestratorShare = (amount(row.orchestrator) / mixed) * 100;
+          const workerShare = 100 - orchestratorShare;
+          const mixedWidth = Math.max(2.5, Math.min(100, (mixed / baseline) * 100));
+          return (
+            <article className="cost-scenario-card" key={row.scenario}>
+              <div className="cost-scenario-top">
+                <div>
+                  <span className="cost-scenario-label">{row.scenario}</span>
+                  <p>{row.volume} <span>input / output</span></p>
+                </div>
+                <span className="cost-savings">{row.savings}</span>
+              </div>
+              <div className="cost-price-row"><span>All Sonnet 5</span><strong>{row.baseline}</strong></div>
+              <div className="cost-track" role="img" aria-label={`Baseline cost ${row.baseline}`}>
+                <span className="cost-track-fill cost-baseline-fill" style={{ width: '100%' }} />
+              </div>
+              <div className="cost-price-row cost-mixed-row"><span>Mixed total</span><strong>{row.mixed}</strong></div>
+              <div className="cost-track" role="img" aria-label={`Mixed cost ${row.mixed}, ${row.savings} than baseline`}>
+                <span className="cost-track-fill cost-mixed-fill" style={{ width: `${mixedWidth}%` }} />
+              </div>
+              <div className="cost-role-breakdown">
+                <div className="cost-role-bar" role="img" aria-label={`Orchestrator ${row.orchestrator}; workers ${row.workers}`}>
+                  <span className="cost-role-orchestrator" style={{ width: `${orchestratorShare}%` }} />
+                  <span className="cost-role-workers" style={{ width: `${workerShare}%` }} />
+                </div>
+                <div className="cost-role-legend">
+                  <span><i className="legend-orchestrator" />Orchestrator <strong>{row.orchestrator}</strong></span>
+                  <span><i className="legend-workers" />Workers <strong>{row.workers}</strong></span>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+      <p className="cost-visual-footnote">API spend illustration at equal token volumes—not a quality or total-work-cost guarantee. Review effort and rework still matter.</p>
+    </section>
   );
 }
 
