@@ -162,7 +162,7 @@ function guideGroups() {
   const economics = groups.flatMap((group) => group.items.filter((item) => item.route === '/guide/token-economics'));
   for (const group of groups) group.items = group.items.filter((item) => item.route !== '/guide/token-economics');
   if (economics.length) groups.unshift({ title: 'Cost & efficiency', items: economics });
-  return [{ title: 'Start here', items: [{ title: 'Guide index', route: '/guide' }] }, ...groups.filter((group) => group.items.length > 0)];
+  return [{ title: 'Start here', items: [{ title: 'Workflow overview', route: '/guide' }] }, ...groups.filter((group) => group.items.length > 0)];
 }
 
 const playbookGroups = guideGroups();
@@ -759,6 +759,179 @@ function StarterReader({ doc }: { doc: SiteDocument }) {
   );
 }
 
+function GuideOverview() {
+  const topicGroups = playbookGroups.filter((group) => group.title !== 'Start here');
+  const descriptions: Record<string, string> = {
+    'Cost & efficiency': 'Optimize the cost of an accepted result—not token count in isolation.',
+    Orientation: 'Choose a working mode and get aligned on the outcome before tools take over.',
+    'Roles and delegation': 'Keep one accountable owner; send workers bounded tasks with checkable outputs.',
+    'Environment and continuity': 'Make long work observable, bounded, and easy to resume.',
+    'Improvement from evidence': 'Use real outcomes to improve the workflow without accumulating ceremony.',
+    'Adapters and adoption': 'Bring the same core approach to different tools and existing projects.',
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f2f4ee] text-[#17201a]">
+      <SiteHeader />
+      <main>
+        <section className="guide-overview-hero px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
+          <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[.85fr_1.15fr]">
+            <div className="max-w-xl">
+              <span className="overview-badge"><i /> A PRACTICAL WAY TO BUILD WITH AGENTS</span>
+              <h1 className="mt-7 text-[clamp(3.1rem,6vw,5.5rem)] font-semibold leading-[.96] tracking-[-.075em]">
+                Spend less time
+                <br />
+                herding agents.
+                <br />
+                <span className="text-[#52793a]">Ship with confidence.</span>
+              </h1>
+              <p className="mt-6 max-w-lg text-base leading-7 text-[#5b6758] sm:text-lg sm:leading-8">
+                Keep your attention on intent and hard decisions. Let coding agents take bounded work, then use evidence—not optimism—to decide what lands.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a className="button-primary" href={routeHref('/guide', 'operating-loop')}>See the flow <span aria-hidden="true">↓</span></a>
+                <a className="button-secondary" href={routeHref('/guide/bootstrap-checklist')}>Start a small pilot <span aria-hidden="true">→</span></a>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-[#697466]">
+                <span className="inline-flex items-center gap-2"><span className="tiny-check">✓</span>Tool-neutral</span>
+                <span className="inline-flex items-center gap-2"><span className="tiny-check">✓</span>Bounded delegation</span>
+                <span className="inline-flex items-center gap-2"><span className="tiny-check">✓</span>Evidence-first</span>
+              </div>
+            </div>
+            <WorkflowPreview />
+          </div>
+        </section>
+
+        <section className="bg-white px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="max-w-2xl">
+              <p className="section-eyebrow">Why this works</p>
+              <h2 className="section-heading">Get your focus back.</h2>
+              <p className="mt-5 text-base leading-7 text-[#667064]">The win isn’t the number of agents. It’s more accepted work with less orchestration drag.</p>
+            </div>
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {[
+                ['Keep the judgment', 'You and the orchestrator hold intent, trade-offs, shared contracts, and final acceptance.'],
+                ['Parallelize the legwork', 'Workers explore, implement, test, and report in bounded slices—without competing for the same files.'],
+                ['Trust what was checked', 'Review the integrated diff, use focused CI, and fail closed when the evidence is missing or stale.'],
+              ].map(([title, copy], index) => (
+                <article className="principle-card" key={title}>
+                  <span className="principle-number">0{index + 1}</span>
+                  <h3 className="mt-10 text-xl font-semibold tracking-[-.04em] text-[#19221b]">{title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-[#667064]">{copy}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="operating-loop" className="guide-loop-section bg-[#121a15] px-5 py-16 text-white sm:px-8 sm:py-24 lg:px-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-8 md:grid-cols-[.75fr_1.25fr] md:items-end">
+              <div>
+                <p className="section-eyebrow text-[#bfe66a]">The repeatable loop</p>
+                <h2 className="section-heading text-white">A route from idea to merge.</h2>
+              </div>
+              <p className="max-w-2xl text-base leading-7 text-white/60 md:justify-self-end">Answer the human questions early. Keep worker assignments small. Spend the expensive context on choices, integration, and acceptance.</p>
+            </div>
+            <div className="guide-step-grid mt-10">
+              {[
+                ['01', 'Frame', 'Agree on outcome, scope, and what “done” means.'],
+                ['02', 'Route', 'Choose human or judge authority before the implementation wave.'],
+                ['03', 'Delegate', 'Give workers disjoint slices and one clear return contract.'],
+                ['04', 'Verify', 'Integrate diffs, run focused CI, and review independently.'],
+                ['05', 'Accept', 'Merge only when the selected policy and required evidence agree.'],
+              ].map(([number, title, copy]) => (
+                <article className="guide-step" key={number}>
+                  <span>{number}</span>
+                  <h3>{title}</h3>
+                  <p>{copy}</p>
+                </article>
+              ))}
+            </div>
+            <a className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[#d8fa74] hover:text-white" href={routeHref('/guide/agentic-workflow')}>
+              Read the detailed workflow <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </section>
+
+        <section className="bg-[#e9eee5] px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
+          <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-center">
+            <div>
+              <p className="section-eyebrow">Cost that matters</p>
+              <h2 className="section-heading">Optimize the accepted change, not the token bill.</h2>
+              <p className="mt-5 max-w-xl text-base leading-7 text-[#64705f]">Count model spend, orchestration, review effort, and rework together. A lower-priced model is only a saving if the result still lands cleanly.</p>
+              <a className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#52753a] hover:text-[#17201a]" href={routeHref('/guide/token-economics')}>
+                Explore the cost comparison <span aria-hidden="true">→</span>
+              </a>
+            </div>
+            <div className="overview-cost-card">
+              <div className="overview-cost-row"><span>Model spend</span><b>+</b><span>Orchestration</span></div>
+              <div className="overview-cost-row"><span>Review effort</span><b>+</b><span>Rework</span></div>
+              <div className="overview-cost-result"><span>Cost per accepted result</span><strong>the number that matters</strong></div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <div className="max-w-2xl">
+                <p className="section-eyebrow">Keep parallel work independent</p>
+                <h2 className="section-heading">Separate candidates.<br />Refresh only when needed.</h2>
+              </div>
+              <span className="roadmap-badge">DESIGN DIRECTION · IN PROGRESS</span>
+            </div>
+            <p className="mt-5 max-w-3xl text-base leading-7 text-[#667064]">For concurrent release candidates, isolate each stream and its handoff. When one reaches `main`, mark the others stale; rebase and revalidate a candidate only when it’s ready to resume UAT or promotion.</p>
+            <div className="rc-board mt-8">
+              <div className="rc-mainline"><span>MAIN · STABLE</span><i /><span className="rc-main-event">Human promotion</span></div>
+              <div className="rc-lane">
+                <span className="rc-name">RC A</span>
+                <div className="rc-flow"><span>Base SHA</span><b>→</b><span>Worker</span><b>→</b><span>CI + judge</span><b>→</b><strong>rc1</strong></div>
+                <small>Isolated UAT slot A</small>
+              </div>
+              <div className="rc-lane rc-lane-stale">
+                <span className="rc-name">RC B</span>
+                <div className="rc-flow"><span>Base SHA</span><b>→</b><span>Worker</span><b>→</b><span>CI + judge</span><b>→</b><strong>rc1</strong></div>
+                <small><i /> Mark stale when main advances</small>
+              </div>
+              <div className="rc-refresh"><strong>On next UAT or promotion:</strong><span>rebase on new main → rerun checks and judge → immutable rc2 → redeploy</span></div>
+            </div>
+            <p className="mt-4 text-xs leading-5 text-[#808a79]">This candidate-lifecycle automation is a framework direction, not a claim that every forge is wired end-to-end today.</p>
+          </div>
+        </section>
+
+        <section className="bg-[#f2f4ee] px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <div>
+                <p className="section-eyebrow">Go deeper</p>
+                <h2 className="section-heading">A guide organized around real work.</h2>
+              </div>
+              <a className="text-sm font-bold text-[#52753a] hover:text-[#17201a]" href={routeHref('/guide/what-this-is')}>Start with the introduction →</a>
+            </div>
+            <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {topicGroups.map((group, index) => (
+                <article className="topic-card" key={group.title}>
+                  <span className="topic-card-number">0{index + 1}</span>
+                  <h3>{group.title}</h3>
+                  <p>{descriptions[group.title] ?? 'Practical guidance for applying the agentic workflow in a real repository.'}</p>
+                  <ul>
+                    {group.items.slice(0, 3).map((item) => (
+                      <li key={item.route}><a href={routeHref(item.route)}>{item.title}<span aria-hidden="true">→</span></a></li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+      <ReaderFooter />
+    </div>
+  );
+}
+
 function ReaderLayout({
   doc,
   groups,
@@ -928,7 +1101,7 @@ function ReaderFooter() {
 function App() {
   const [location, setLocation] = useState(currentLocation);
   const [loadedDocument, setLoadedDocument] = useState<{ route: string; doc: SiteDocument | null }>({ route: '', doc: null });
-  const entry = entryByRoute.get(location.route);
+  const entry = location.route === '/guide' ? undefined : entryByRoute.get(location.route);
 
   useEffect(() => {
     const updateLocation = () => setLocation(currentLocation());
@@ -966,10 +1139,17 @@ function App() {
 
   useEffect(() => {
     const doc = loadedDocument.route === location.route ? loadedDocument.doc : null;
-    document.title = doc ? `${doc.title} · Agentic Approach` : location.route === '/starter' ? 'Starter · Agentic Approach' : 'Agentic Approach — Work with agents, keep control';
+    document.title = location.route === '/guide'
+      ? 'The workflow · Agentic Approach'
+      : doc
+        ? `${doc.title} · Agentic Approach`
+        : location.route === '/starter'
+          ? 'Starter · Agentic Approach'
+          : 'Agentic Approach — Work with agents, keep control';
   }, [location.route, loadedDocument]);
 
   if (location.route === '/starter') return <StarterOverview />;
+  if (location.route === '/guide') return <GuideOverview />;
   const doc = loadedDocument.route === location.route ? loadedDocument.doc : null;
   if (doc?.scope === 'guide') return <GuideReader doc={doc} />;
   if (doc?.scope === 'starter') return <StarterReader doc={doc} />;
