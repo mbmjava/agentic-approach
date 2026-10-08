@@ -3,6 +3,10 @@
 The playbook is a set of short topics. Start with [What this is](what-this-is.md), then follow the reading
 path in the [playbook](playbook.md). This page is the full topic index.
 
+![Agentic coding flow from idea to merge: the user and orchestrator frame work, bounded workers return diffs, local checks run, and the PR fans out to CI and a read-only reviewer. A separate judge feeds a policy-based, fail-closed merge decision; failures loop back to implementation.](coding-flow.svg)
+
+[Open or download the standalone SVG](coding-flow.svg).
+
 ## Orientation
 
 - [What this is](what-this-is.md) — purpose, source, and how to use the guide.

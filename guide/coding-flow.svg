@@ -1,0 +1,255 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1300" viewBox="0 0 1800 1300" role="img" aria-labelledby="title desc">
+  <title id="title">From idea to merge: an agentic coding flow</title>
+  <desc id="desc">A user and orchestrator frame an idea, route bounded work to parallel workers, integrate and verify their changes, then open a pull request. CI and independent review provide parallel evidence. Required checks and approval lead to merge; failures loop back to implementation.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111a32"/>
+      <stop offset="0.55" stop-color="#0b1020"/>
+      <stop offset="1" stop-color="#11152b"/>
+    </linearGradient>
+    <linearGradient id="userTint" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#123c49"/>
+      <stop offset="1" stop-color="#14283a"/>
+    </linearGradient>
+    <linearGradient id="agentTint" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#292852"/>
+      <stop offset="1" stop-color="#1c203d"/>
+    </linearGradient>
+    <linearGradient id="workerTint" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#153650"/>
+      <stop offset="1" stop-color="#15263f"/>
+    </linearGradient>
+    <linearGradient id="gateTint" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#43331e"/>
+      <stop offset="1" stop-color="#25253a"/>
+    </linearGradient>
+    <linearGradient id="mergeTint" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#153d38"/>
+      <stop offset="1" stop-color="#172e35"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#030611" flood-opacity="0.38"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0 10 5 0 10Z" fill="#7183a5"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0 10 5 0 10Z" fill="#55d6aa"/>
+    </marker>
+    <marker id="arrowCoral" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0 10 5 0 10Z" fill="#fb8291"/>
+    </marker>
+    <style>
+      text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .muted { fill: #a4b1ca; }
+      .body { fill: #d6deed; font-size: 17px; }
+      .small { fill: #aab7ce; font-size: 14px; }
+      .card { stroke: #ffffff; stroke-opacity: .12; stroke-width: 1.2; }
+      .connector { fill: none; stroke: #7183a5; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .thin-connector { fill: none; stroke: #7183a5; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1800" height="1300" fill="url(#bg)"/>
+  <circle cx="1580" cy="80" r="300" fill="#5b54d6" opacity=".08"/>
+  <circle cx="190" cy="1110" r="340" fill="#20b99f" opacity=".055"/>
+
+  <text x="72" y="68" fill="#7de0d0" font-size="14" font-weight="700" letter-spacing="2.8">A PRACTICAL AGENTIC CODING LOOP</text>
+  <text x="72" y="137" fill="#f4f7ff" font-size="58" font-weight="750" letter-spacing="-1.8">From idea to merge</text>
+  <text x="76" y="180" fill="#aebbd2" font-size="21">Human intent. Focused workers. Evidence before integration.</text>
+  <g transform="translate(1398 79)">
+    <rect width="326" height="74" rx="18" fill="#141d34" stroke="#ffffff" stroke-opacity=".1"/>
+    <circle cx="26" cy="26" r="6" fill="#53d9c5"/>
+    <text x="45" y="31" fill="#c8d4e8" font-size="14" font-weight="650">USER + ORCHESTRATOR</text>
+    <circle cx="26" cy="51" r="6" fill="#59b8f2"/>
+    <text x="45" y="56" fill="#c8d4e8" font-size="14" font-weight="650">BOUNDED WORKERS</text>
+    <circle cx="214" cy="26" r="6" fill="#f2b75e"/>
+    <text x="230" y="31" fill="#c8d4e8" font-size="14" font-weight="650">QUALITY GATES</text>
+    <circle cx="214" cy="51" r="6" fill="#55d6aa"/>
+    <text x="230" y="56" fill="#c8d4e8" font-size="14" font-weight="650">MERGE</text>
+  </g>
+
+  <text x="72" y="246" fill="#687995" font-size="13" font-weight="700" letter-spacing="2">THE DELIVERY PATH</text>
+  <line x1="257" y1="241" x2="1728" y2="241" stroke="#7785a0" stroke-opacity=".18"/>
+
+  <!-- Main path connectors, drawn behind the stage cards. -->
+  <path class="connector" d="M265 444 H292" marker-end="url(#arrow)"/>
+  <path class="connector" d="M550 444 H577" marker-end="url(#arrow)"/>
+  <path class="connector" d="M812 444 H839" marker-end="url(#arrow)"/>
+  <path class="connector" d="M1180 444 H1207" marker-end="url(#arrow)"/>
+  <path class="connector" d="M1460 444 H1487" marker-end="url(#arrow)"/>
+  <path class="connector" d="M1615 590 V642 H1550 V812" marker-end="url(#arrow)"/>
+
+  <!-- 1: Idea -->
+  <g filter="url(#shadow)">
+    <rect class="card" x="60" y="292" width="205" height="298" rx="22" fill="url(#userTint)"/>
+    <rect x="60" y="292" width="205" height="5" rx="2.5" fill="#53d9c5"/>
+    <text x="82" y="331" fill="#63dfd0" font-size="13" font-weight="750" letter-spacing="1.6">01 · START</text>
+    <text x="82" y="376" fill="#f3f7ff" font-size="26" font-weight="700">An idea</text>
+    <rect x="82" y="397" width="118" height="27" rx="13.5" fill="#53d9c5" fill-opacity=".14"/>
+    <text x="96" y="416" fill="#88eee0" font-size="12" font-weight="700" letter-spacing=".5">THE USER</text>
+    <text class="body" x="82" y="458">
+      <tspan x="82" dy="0">Describe the outcome,</tspan>
+      <tspan x="82" dy="25">context and taste.</tspan>
+      <tspan x="82" dy="35" fill="#a9c9d0">Not a perfect spec.</tspan>
+    </text>
+  </g>
+
+  <!-- 2: Frame -->
+  <g filter="url(#shadow)">
+    <rect class="card" x="300" y="292" width="250" height="298" rx="22" fill="url(#agentTint)"/>
+    <rect x="300" y="292" width="250" height="5" rx="2.5" fill="#a998ff"/>
+    <text x="322" y="331" fill="#b7aaff" font-size="13" font-weight="750" letter-spacing="1.6">02 · FRAME</text>
+    <text x="322" y="376" fill="#f3f7ff" font-size="26" font-weight="700">Get aligned</text>
+    <rect x="322" y="397" width="186" height="27" rx="13.5" fill="#aa98ff" fill-opacity=".14"/>
+    <text x="336" y="416" fill="#c8bdff" font-size="12" font-weight="700" letter-spacing=".45">USER + ORCHESTRATOR</text>
+    <text class="body" x="322" y="458">
+      <tspan x="322" dy="0">Orient in the repo.</tspan>
+      <tspan x="322" dy="25">Agree on scope,</tspan>
+      <tspan x="322" dy="25">acceptance and risks.</tspan>
+      <tspan x="322" dy="35" class="small">Ask when the answer matters.</tspan>
+    </text>
+  </g>
+
+  <!-- 3: Route -->
+  <g filter="url(#shadow)">
+    <rect class="card" x="585" y="292" width="227" height="298" rx="22" fill="url(#agentTint)"/>
+    <rect x="585" y="292" width="227" height="5" rx="2.5" fill="#a998ff"/>
+    <text x="607" y="331" fill="#b7aaff" font-size="13" font-weight="750" letter-spacing="1.6">03 · ROUTE</text>
+    <text x="607" y="376" fill="#f3f7ff" font-size="26" font-weight="700">Split the work</text>
+    <text class="body" x="607" y="418">
+      <tspan x="607" dy="0">Delegate separable</tspan>
+      <tspan x="607" dy="24">slices with clear</tspan>
+      <tspan x="607" dy="24">ownership and checks.</tspan>
+      <tspan x="607" dy="38" fill="#c0b6ff">Keep decisions &amp;</tspan>
+      <tspan x="607" dy="23" fill="#c0b6ff">shared contracts central.</tspan>
+    </text>
+    <rect x="607" y="543" width="183" height="28" rx="14" fill="#ffffff" fill-opacity=".06"/>
+    <text x="621" y="562" fill="#b7c2d8" font-size="11" font-weight="700" letter-spacing=".5">INLINE WHEN IT'S CHEAPER</text>
+  </g>
+
+  <!-- 4: Bounded parallel worker lanes -->
+  <g filter="url(#shadow)">
+    <rect class="card" x="840" y="292" width="340" height="298" rx="22" fill="url(#workerTint)"/>
+    <rect x="840" y="292" width="340" height="5" rx="2.5" fill="#59b8f2"/>
+    <text x="862" y="331" fill="#75cafa" font-size="13" font-weight="750" letter-spacing="1.6">04 · BUILD</text>
+    <text x="862" y="376" fill="#f3f7ff" font-size="26" font-weight="700">Workers execute</text>
+    <text x="862" y="401" fill="#abc1d8" font-size="13">Disjoint scope · findings + diff back · no Git writes</text>
+    <rect x="862" y="422" width="296" height="40" rx="11" fill="#ffffff" fill-opacity=".055" stroke="#ffffff" stroke-opacity=".07"/>
+    <circle cx="882" cy="442" r="6" fill="#59b8f2"/>
+    <text x="899" y="447" fill="#e0e9f7" font-size="15" font-weight="650">Frontend / API</text>
+    <text x="1138" y="447" fill="#94a8c5" font-size="12" text-anchor="end">focused diff</text>
+    <rect x="862" y="471" width="296" height="40" rx="11" fill="#ffffff" fill-opacity=".055" stroke="#ffffff" stroke-opacity=".07"/>
+    <circle cx="882" cy="491" r="6" fill="#59b8f2"/>
+    <text x="899" y="496" fill="#e0e9f7" font-size="15" font-weight="650">Tests / docs</text>
+    <text x="1138" y="496" fill="#94a8c5" font-size="12" text-anchor="end">evidence</text>
+    <rect x="862" y="520" width="296" height="48" rx="11" fill="#aa98ff" fill-opacity=".11" stroke="#aa98ff" stroke-opacity=".16"/>
+    <text x="878" y="541" fill="#c4baff" font-size="13" font-weight="700">ORCHESTRATOR</text>
+    <text x="878" y="559" fill="#c4cce0" font-size="12">Owns coupled work, contracts &amp; direction</text>
+  </g>
+
+  <!-- 5: Integrate -->
+  <g filter="url(#shadow)">
+    <rect class="card" x="1210" y="292" width="250" height="298" rx="22" fill="url(#agentTint)"/>
+    <rect x="1210" y="292" width="250" height="5" rx="2.5" fill="#a998ff"/>
+    <text x="1232" y="331" fill="#b7aaff" font-size="13" font-weight="750" letter-spacing="1.6">05 · INTEGRATE</text>
+    <text x="1232" y="376" fill="#f3f7ff" font-size="26" font-weight="700">Inspect &amp; join</text>
+    <text class="body" x="1232" y="418">
+      <tspan x="1232" dy="0">Review each diff.</tspan>
+      <tspan x="1232" dy="25">Resolve seams; reject</tspan>
+      <tspan x="1232" dy="25">scope drift.</tspan>
+      <tspan x="1232" dy="38" fill="#c0b6ff">Orchestrator owns</tspan>
+      <tspan x="1232" dy="23" fill="#c0b6ff">integration &amp; Git.</tspan>
+    </text>
+  </g>
+
+  <!-- 6: Local gate -->
+  <g filter="url(#shadow)">
+    <rect class="card" x="1490" y="292" width="250" height="298" rx="22" fill="url(#gateTint)"/>
+    <rect x="1490" y="292" width="250" height="5" rx="2.5" fill="#f2b75e"/>
+    <text x="1512" y="331" fill="#f4c779" font-size="13" font-weight="750" letter-spacing="1.6">06 · VERIFY</text>
+    <text x="1512" y="376" fill="#f3f7ff" font-size="26" font-weight="700">Local quality gate</text>
+    <text class="body" x="1512" y="418">
+      <tspan x="1512" dy="0">Focused tests, lint</tspan>
+      <tspan x="1512" dy="25">and static analysis.</tspan>
+      <tspan x="1512" dy="38" fill="#f0d09b">Review the final diff.</tspan>
+      <tspan x="1512" dy="25">Fix issues before PR.</tspan>
+    </text>
+    <rect x="1512" y="543" width="194" height="28" rx="14" fill="#f2b75e" fill-opacity=".13"/>
+    <text x="1526" y="562" fill="#f6d394" font-size="11" font-weight="750" letter-spacing=".65">PASS → OPEN A PR</text>
+  </g>
+
+  <!-- Pull request quality gate -->
+  <rect x="60" y="674" width="1680" height="477" rx="27" fill="#10182b" fill-opacity=".82" stroke="#ffffff" stroke-opacity=".09"/>
+  <text x="92" y="718" fill="#f2c779" font-size="13" font-weight="750" letter-spacing="2">PULL REQUEST · INDEPENDENT EVIDENCE</text>
+  <text x="92" y="744" fill="#94a3bd" font-size="14">Starter example: a fail-closed approval loop. Keep required checks in provider branch protection.</text>
+
+  <!-- PR fans out to CI and an independent reviewer. -->
+  <path class="thin-connector" d="M1400 870 H1372 V817 H1350" marker-end="url(#arrow)"/>
+  <path class="thin-connector" d="M1400 960 H1372 V1030 H1350" marker-end="url(#arrow)"/>
+  <!-- CI and reviewer evidence feed a separate, adversarial judge. -->
+  <path class="thin-connector" d="M1000 817 H970 V880 H930" marker-end="url(#arrow)"/>
+  <path class="thin-connector" d="M1000 1030 H970 V975 H930" marker-end="url(#arrow)"/>
+  <!-- Only the decision step can authorize the merge actuator. -->
+  <path class="thin-connector" d="M600 930 H530" marker-end="url(#arrowGreen)"/>
+
+  <!-- Fail-closed approval decision and merge actuator. -->
+  <g filter="url(#shadow)">
+    <rect class="card" x="130" y="820" width="400" height="245" rx="22" fill="url(#mergeTint)" stroke="#55d6aa" stroke-opacity=".28"/>
+    <rect x="130" y="820" width="400" height="5" rx="2.5" fill="#55d6aa"/>
+    <text x="158" y="860" fill="#6be0b8" font-size="13" font-weight="750" letter-spacing="1.6">08 · FAIL-CLOSED DECISION</text>
+    <text x="158" y="900" fill="#f3f7ff" font-size="25" font-weight="700">Merge only on agreement</text>
+    <text x="158" y="934" fill="#d6deed" font-size="15" font-weight="650">model authority + CI pass + judge approve</text>
+    <text x="158" y="964" fill="#c4cde0" font-size="14">Human authority → human; otherwise escalate.</text>
+    <line x1="158" y1="986" x2="502" y2="986" stroke="#ffffff" stroke-opacity=".12"/>
+    <text x="158" y="1013" fill="#9adbc5" font-size="13">Orchestrator runs merge only when allowed.</text>
+    <text x="158" y="1038" fill="#91a0b8" font-size="12">Provider rules remain the actual merge gate.</text>
+  </g>
+
+  <!-- Independent reviewer: findings, not authority. -->
+  <g filter="url(#shadow)">
+    <rect class="card" x="1000" y="945" width="350" height="170" rx="20" fill="#20213a"/>
+    <rect x="1000" y="945" width="5" height="170" rx="2.5" fill="#a998ff"/>
+    <text x="1026" y="979" fill="#b7aaff" font-size="12" font-weight="750" letter-spacing="1.25">07B · INDEPENDENT REVIEW</text>
+    <text x="1026" y="1016" fill="#f3f7ff" font-size="22" font-weight="700">Fresh, read-only pass</text>
+    <text x="1026" y="1047" fill="#c4cde0" font-size="14">Cited findings + approve / changes / comment.</text>
+    <text x="1026" y="1080" fill="#fb9ba5" font-size="13" font-weight="650">Reviewer recommends; does not merge.</text>
+  </g>
+
+  <!-- Automated CI -->
+  <g filter="url(#shadow)">
+    <rect class="card" x="1000" y="732" width="350" height="170" rx="20" fill="url(#gateTint)"/>
+    <rect x="1000" y="732" width="5" height="170" rx="2.5" fill="#f2b75e"/>
+    <text x="1026" y="766" fill="#f4c779" font-size="12" font-weight="750" letter-spacing="1.4">07A · AUTOMATED CI</text>
+    <text x="1026" y="803" fill="#f3f7ff" font-size="22" font-weight="700">Build &amp; quality checks</text>
+    <text x="1026" y="833" fill="#c4cde0" font-size="13">Backend · frontend · docs · harness / loop</text>
+    <text x="1026" y="866" fill="#fb9ba5" font-size="13" font-weight="650">Failure? Fix, push and rerun.</text>
+  </g>
+
+  <!-- Separate judge: verifies CI, review and acceptance; no merge authority. -->
+  <g filter="url(#shadow)">
+    <rect class="card" x="600" y="820" width="330" height="220" rx="20" fill="#20213a" stroke="#a998ff" stroke-opacity=".26"/>
+    <rect x="600" y="820" width="5" height="220" rx="2.5" fill="#a998ff"/>
+    <text x="626" y="855" fill="#b7aaff" font-size="12" font-weight="750" letter-spacing="1.35">07C · ADVERSARIAL JUDGE</text>
+    <text x="626" y="895" fill="#f3f7ff" font-size="23" font-weight="700">A separate decision</text>
+    <text x="626" y="929" fill="#c4cde0" font-size="14">Rechecks findings, CI and acceptance.</text>
+    <text x="626" y="955" fill="#c4cde0" font-size="14">Returns approve / changes / escalate.</text>
+    <rect x="626" y="979" width="267" height="34" rx="17" fill="#aa98ff" fill-opacity=".11"/>
+    <text x="759" y="1001" fill="#c8bdff" font-size="12" font-weight="700" text-anchor="middle">READ-ONLY · NO MERGE AUTHORITY</text>
+  </g>
+
+  <!-- Approval authority is resolved by policy, not improvised during review. -->
+  <g>
+    <rect x="154" y="765" width="352" height="34" rx="17" fill="#f2b75e" fill-opacity=".11" stroke="#f2b75e" stroke-opacity=".2"/>
+    <text x="330" y="787" fill="#f4d59d" font-size="11" font-weight="700" text-anchor="middle">POLICY: HOLD / RISK → HUMAN · DEFAULT → MODEL</text>
+    <path d="M330 799 V820" fill="none" stroke="#f2b75e" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- Failure / requested-changes loop back to implementation. -->
+  <path d="M770 1040 V1190 H30 V642 H1010 V590" fill="none" stroke="#fb8291" stroke-width="2.5" stroke-dasharray="8 9" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowCoral)" opacity=".8"/>
+  <rect x="394" y="1169" width="484" height="39" rx="19.5" fill="#261a2a" stroke="#fb8291" stroke-opacity=".27"/>
+  <text x="636" y="1194" fill="#ffabb3" font-size="13" font-weight="700" text-anchor="middle" letter-spacing=".45">FAIL OR REQUEST CHANGES → REVISE, VERIFY, RESUBMIT</text>
+
+  <text x="92" y="1254" fill="#8290aa" font-size="14">Workers accelerate execution. The orchestrator owns integration. Policy governs approval; product intent stays human-steerable.</text>
+  <text x="1708" y="1254" fill="#64728c" font-size="12" text-anchor="end" letter-spacing="1.2">IDEA → EVIDENCE → MERGE</text>
+</svg>
