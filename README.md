@@ -6,6 +6,10 @@ The playbook (`guide/`) extracts what actually works in real projects, generaliz
 complete starter (`app/`) that already has the workflow, agents, checks, and CI wired — so you start
 from a working setup instead of assembling one by hand.
 
+![From idea to merge: user and orchestrator frame the work, bounded workers implement, then local checks, a pull request, CI, independent review, a judge, and a policy-based merge gate.](guide/coding-flow.svg)
+
+[Open or download the workflow visual](guide/coding-flow.svg).
+
 ## Start here
 
 - **New to agentic coding:** [What this is](guide/what-this-is.md) → [Playbook](guide/playbook.md) →
