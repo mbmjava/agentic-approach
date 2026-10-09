@@ -2,7 +2,7 @@ import { createGitHubForge } from './github.mjs';
 import { createGitLabForge } from './gitlab.mjs';
 
 // Forge port: every adapter implements the same interface so the loop stays forge-neutral.
-//   getChange(id)          -> { id, forge, headSha, baseRef, author, draft, changedFiles[], labels[] }
+//   getChange(id)          -> { id, forge, headSha, baseRef, author, draft, description, changedFiles[], labels[] }
 //   getChecks(headSha)     -> { state: 'pass'|'fail'|'pending', runs[] }
 //   postComment(id, body)
 //   setLabel(id, name, on)

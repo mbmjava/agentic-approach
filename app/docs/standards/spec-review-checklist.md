@@ -3,7 +3,7 @@ title: Specification review checklist
 type: standard
 status: active
 owner: mbmjava
-last_updated: 2026-10-07
+last_updated: 2026-10-08
 tags: [standard, review, specs, agents]
 ---
 
@@ -23,7 +23,8 @@ If the requirement cannot be located, return `request-changes` or `escalate` rat
 
 Report each item as `pass`, `fail`, or `n-a`, with concise evidence:
 
-1. **Identity and traceability** — the spec ID is explicit; requirements (`R-<n>`), acceptance
+1. **Identity and traceability** — the spec ID and `spec_type` are explicit; the authorized owner selected
+   exactly one `approval_mode: human | judge` during spec creation; requirements (`R-<n>`), acceptance
    criteria (`AC-<n>`), linked decisions, and K issues are stable and internally consistent.
 2. **Intent and boundaries** — the problem, goals, non-goals, and scope/interfaces agree; unresolved
    product intent is visible rather than inferred.

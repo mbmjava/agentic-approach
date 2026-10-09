@@ -10,25 +10,50 @@ import { loadConfig } from './config.mjs';
 import { resolveAuthority } from './authority.mjs';
 import { decide } from './decide.mjs';
 import { createForge } from './forge/index.mjs';
+import { assertTrustedCheckout } from './preflight.mjs';
+import { extractSpecId, loadSpecMode } from './spec-reference.mjs';
 
-export async function runApproval({ config, forge, pr, judgeVerdict, expectedHeadSha, allowMerge = false }) {
+export async function runApproval({ config, forge, pr, judgeVerdict, expectedHeadSha, allowMerge = false,
+  expectedSpecSha, specModeLoader = loadSpecMode }) {
   const change = await forge.getChange(pr);
   const guards = [];
-  if (change.baseRef !== config.rollupBranch) guards.push(`base-branch:${change.baseRef}`);
-  if (expectedHeadSha && change.headSha !== expectedHeadSha) guards.push('head-moved');
-  const authority = resolveAuthority({ config, labels: change.labels, changedFiles: change.changedFiles });
+  if (typeof expectedHeadSha !== 'string' || !expectedHeadSha.trim()) guards.push('head-sha-required');
+  else if (change.headSha !== expectedHeadSha) guards.push('head-moved');
+  if (typeof expectedSpecSha !== 'string' || !expectedSpecSha.trim()) guards.push('spec-sha-required');
+  let specId = null;
+  let spec = null;
+  let specError = null;
+  try {
+    specId = extractSpecId(change.description);
+    spec = await specModeLoader({ specId, config });
+  } catch (error) {
+    specError = error.message;
+  }
+  if (expectedSpecSha && spec?.trustedSha && spec.trustedSha !== expectedSpecSha) guards.push('spec-moved');
+  else if (expectedSpecSha && !spec?.trustedSha) guards.push('spec-sha-unverified');
+  const authority = resolveAuthority({ config, labels: change.labels, changedFiles: change.changedFiles,
+    approvalMode: spec?.approvalMode, specError, baseRef: change.baseRef });
   const checks = await forge.getChecks(change.headSha);
-  const decision = guards.length
+  let decision = guards.length
     ? { action: 'escalate', reason: guards.join(',') }
     : decide({ authority: authority.authority, ciState: checks.state, judgeVerdict });
   let merged = null;
   if (decision.action === 'merge') {
-    merged = allowMerge
-      ? await forge.merge(pr, { method: config.merge.method, sha: change.headSha })
-      : 'dry-run';
+    if (allowMerge) {
+      const beforeMerge = await forge.getChange(pr);
+      const lateGuards = [];
+      if (beforeMerge.headSha !== change.headSha) lateGuards.push('head-moved-before-merge');
+      if (beforeMerge.baseRef !== change.baseRef) lateGuards.push('target-moved-before-merge');
+      if (lateGuards.length) decision = { action: 'escalate', reason: lateGuards.join(',') };
+      else merged = await forge.merge(pr, { method: config.merge.method, sha: change.headSha });
+    } else {
+      merged = 'dry-run';
+    }
   }
-  return { pr, headSha: change.headSha, baseRef: change.baseRef, authority, ci: checks.state,
-    judgeVerdict, guards, decision, merged };
+  return { pr, headSha: change.headSha, baseRef: change.baseRef,
+    spec: { specId: spec?.specId ?? specId, approvalMode: spec?.approvalMode ?? null,
+      trustedRef: spec?.trustedRef ?? null, trustedSha: spec?.trustedSha ?? null, error: specError },
+    authority, ci: checks.state, judgeVerdict, guards, decision, merged };
 }
 
 function arg(name) {
@@ -39,16 +64,29 @@ function arg(name) {
 async function main() {
   const pr = arg('--pr');
   if (!pr) {
-    console.error('Usage: node scripts/agentic/apply.mjs --pr <n> --judge <approve|request-changes|escalate> [--head-sha <sha>] [--allow-merge]');
+    console.error('Usage: node scripts/agentic/apply.mjs --pr <n> --judge <approve|request-changes|escalate> --head-sha <sha> --spec-sha <sha> [--allow-merge]');
     process.exitCode = 2;
     return;
   }
   const config = loadConfig();
   const allowMerge = process.argv.includes('--allow-merge');
-  const forge = createForge({ config, token: process.env.AGENTIC_FORGE_TOKEN, allowMutations: allowMerge });
+  const expectedHeadSha = arg('--head-sha');
+  const expectedSpecSha = arg('--spec-sha');
+  if (!expectedHeadSha?.trim()) {
+    console.error('--head-sha is required to bind the decision to the reviewed PR head');
+    process.exitCode = 2;
+    return;
+  }
+  if (!expectedSpecSha?.trim()) {
+    console.error('--spec-sha is required to bind the decision to the reviewed trusted spec revision');
+    process.exitCode = 2;
+    return;
+  }
   try {
+    assertTrustedCheckout({ config });
+    const forge = createForge({ config, token: process.env.AGENTIC_FORGE_TOKEN, allowMutations: allowMerge });
     const result = await runApproval({ config, forge, pr: Number(pr), judgeVerdict: arg('--judge'),
-      expectedHeadSha: arg('--head-sha'), allowMerge });
+      expectedHeadSha, expectedSpecSha, allowMerge });
     console.log(JSON.stringify(result, null, 2));
   } catch (error) {
     console.error(JSON.stringify({ error: error.message }, null, 2));

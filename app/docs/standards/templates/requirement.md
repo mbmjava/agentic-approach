@@ -4,6 +4,9 @@ type: requirement
 status: draft
 owner: <name>
 last_updated: YYYY-MM-DD
+spec_id: ""
+spec_type: ""
+approval_mode: "" # required owner choice: human | judge; set during spec creation
 tags: [requirement]
 ---
 
@@ -27,3 +30,9 @@ tags: [requirement]
 
 ## 6. Acceptance
 - [ ] <observable acceptance criterion>
+
+## 7. Plan
+- <next action or phase; do not begin implementation before approval and preflight>
+
+## 8. Waves
+- <YYYY-MM-DD — outcome + evidence; one concise line per implementation wave>

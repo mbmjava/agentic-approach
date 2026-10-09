@@ -3,7 +3,7 @@ title: Runbook — agentic approval loop
 type: runbook
 status: active
 owner: mbmjava
-last_updated: 2026-10-07
+last_updated: 2026-10-08
 tags: [runbook, agents, approval, forge]
 ---
 
@@ -11,15 +11,25 @@ tags: [runbook, agents, approval, forge]
 
 ## Purpose
 
-Run the delivery loop that decides **who approves** a change — model by default, human by toggle — and
-merges only when the deterministic checks and the adversarial judge agree. The orchestrator runs it; the
-scripts in `scripts/agentic/` do the deterministic parts and the subagents (`pr-reviewer`, `judge`) do the
-judgement. The **orchestrator** (the agent session) is the single control plane; the decision is the script's.
+Run the delivery loop that resolves **who approves** from the canonical requirement's
+`approval_mode: human | judge`. `judge` maps to model authority; `human` never invokes the merge actuator.
+The orchestrator runs it; scripts in `scripts/agentic/` perform deterministic checks and the read-only
+`pr-reviewer` / `judge` agents supply separate findings and verdicts. The judge is manually launched by the
+orchestrator; the current starter CI does not launch it or publish a judge status check.
 
 ## Prerequisites
 
-- A pull request whose **base is the rollup branch** (`main`, set as `rollupBranch` in
-  `.agentic/config.json`) and whose CI checks have completed.
+- Run wave preflight before implementation or worker dispatch:
+  `node scripts/agentic/preflight.mjs --spec-id <spec_id>`. Carry its approved spec ID and mode in the active
+  plan/handoff. Discussion/spec authoring can happen first; preflight validates the choice made at spec
+  creation and does not ask for a new per-wave toggle.
+- The initial bootstrap change that introduces trusted-spec preflight is human-authorized and reviewed; it
+  cannot use the preflight before that code and its approved spec exist on trusted `main`.
+- For live PR resolution, use a **clean, synchronized checkout of the trusted rollup branch** (`main`, set as
+  `rollupBranch` in `.agentic/config.json`), never the PR source branch.
+- A PR whose description contains exactly one `Spec ID: <spec_id>` reference to an approved requirement on
+  trusted `main`, and whose CI checks have completed. `main` is human-only; judge mode is eligible only for a
+  non-main target matched by `judgeMergeTargets` (empty by default; configure deliberately for the repository).
 - `AGENTIC_FORGE_TOKEN` in the environment for live forge calls.
 - The change must **not** touch a risk path. Anything under `.opencode/**`, `.claude/**`, `.agentic/**`,
   `scripts/agentic/**`, `AGENTS.md`, `CLAUDE.md`, `docs/standards/**`, `working-docs/agent-standards.md`,
@@ -28,23 +38,31 @@ judgement. The **orchestrator** (the agent session) is the single control plane;
 
 ## Steps
 
-1. Confirm the resolved authority for the change (offline, or live with `--pr <n>`):
-   `node scripts/agentic/resolve.mjs --files <changed-file>[,<changed-file>…]`
+1. Resolve the trusted spec authority (offline by ID, or live from the PR's `Spec ID` line). Record the
+   returned `trustedSha` as the spec revision under review:
+   `node scripts/agentic/resolve.mjs --spec-id <spec_id>` or
+   `node scripts/agentic/resolve.mjs --pr <n>`.
 2. Launch `pr-reviewer` on the PR diff → per-item findings + `VERDICT`.
-3. Launch `judge` on the diff + the reviewer output + the reported CI status →
-   `approve | request-changes | escalate`.
-4. Decide without mutating anything (dry run is the default):
-   `node scripts/agentic/apply.mjs --pr <n> --judge <verdict> --head-sha <sha>`
+3. Launch `judge` on the diff + canonical spec ID/mode + reviewer output + reported CI status →
+   `approve | request-changes | escalate`. The mode is context, not something the judge may change; `human`
+   mode is never made mergeable by an approving verdict.
+4. Decide without mutating anything (dry run is the default), binding both the evaluated PR head and trusted
+   spec revision:
+   `node scripts/agentic/apply.mjs --pr <n> --judge <verdict> --head-sha <sha> --spec-sha <trustedSha>`
 5. Merge **only** when the dry run reports `decision.action = "merge"`:
-   `node scripts/agentic/apply.mjs --pr <n> --judge <verdict> --head-sha <sha> --allow-merge`
+   `node scripts/agentic/apply.mjs --pr <n> --judge <verdict> --head-sha <sha> --spec-sha <trustedSha> --allow-merge`
 
 ## Verification
 
-- The dry run prints one JSON object: `authority`, `ci`, `judgeVerdict`, `guards`, `decision`, `merged`.
+- The dry run prints one JSON object: trusted `spec` identity/mode/ref/SHA, `authority`, `ci`, `judgeVerdict`,
+  `guards`, `decision`, and `merged`.
 - `merge` is returned only when `authority=model` **and** `ci=pass` **and** `judge=approve`; any other input
   returns `human` or `escalate` — the loop **fails closed**.
-- A guard (`base-branch:<ref>` or `head-moved`) forces `escalate`: bind the merge to the judged revision
-  with `--head-sha`, so a head that moved after judging is never merged unjudged.
+- A human-mode spec, main target, hold, or configured risk-path match cannot be upgraded by a judge verdict or
+  approval label. Missing/untrusted spec metadata resolves to human/escalate.
+- A guard for a missing/changed spec revision, head SHA, or target forces `escalate`. The actuator re-reads
+  the PR immediately before merge to detect a head or target change since evaluation; provider-native rules
+  remain the ultimate protection against changes outside that read/merge window.
 
 ## Calibrate before you require it
 
@@ -62,9 +80,12 @@ The judge is advisory until it has been measured on **real, correctly-labelled P
 
 ## Provider gate vs loop decision
 
-The loop's `merge` is an **actuator**, not the gate. Prefer making the provider the gate — branch
-protection / required checks that include the judge status — so a change cannot merge without them. The loop
-then merges only on `model + ci-pass + judge-approve`; the provider still owns *what is required*.
+The loop's `merge` is an **actuator**, not the gate. Provider branch protection / protected-branch rules are
+the actual gate. **Current starter limitation:** its provider setup requires CI checks, but no CI workflow
+launches the judge or publishes a judge status. Therefore `apply.mjs` can merge only when the orchestrator
+uses it with an approving verdict, but a person with merge access can still use the provider UI after CI
+passes without waiting for the judge. Do not describe judge approval as provider-enforced until a required
+judge status is wired and bypass is restricted. The GitLab adapter is currently a stub.
 
 ## Rollback
 

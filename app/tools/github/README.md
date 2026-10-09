@@ -13,7 +13,9 @@ Two files (already in the repo) plus one repo setting:
 
 > The reviewer/loop is **not** a GitHub Action and needs no separate service. The orchestrator runs
 > `pr-reviewer` then `judge` on the PR head and decides with `scripts/agentic/apply.mjs`; the provider owns
-> what is *required* to merge. See the [approval-loop runbook](../../docs/runbooks/approval-loop.md).
+> what is *required* to merge. The starter currently does **not** publish a judge status from CI, so the
+> judge is not yet a provider-required merge gate. Direct UI merge can bypass the manually orchestrated judge
+> after the currently required CI checks pass. See the [approval-loop runbook](../../docs/runbooks/approval-loop.md).
 
 ## 1. CODEOWNERS handle
 
@@ -47,6 +49,10 @@ gh api -X PUT repos/OWNER/REPO/branches/main/protection --input /tmp/protection.
 Notes:
 - The check **contexts** must match the CI job `name:` values in `.github/workflows/ci.yml` exactly.
   Confirm them from a recent PR's checks if they differ.
+- The listed contexts are CI checks, not the model judge. A judge-gated merge requires a workflow/status
+  integration for the judge and adding that status to native branch protection before relying on it as a gate.
+- The `.agentic/config.json` example leaves `judgeMergeTargets` explicit. Keep it empty until eligible
+  non-main branches are configured and protected; `main` always resolves to human authority.
 - `enforce_admins: false` lets the owner override while solo; set `true` once a team is in place.
 - `required_approving_review_count: 0` is correct for solo; CODEOWNERS still routes review for harness
   paths, and the orchestrator's review still comments. Raise it when a second developer joins.
