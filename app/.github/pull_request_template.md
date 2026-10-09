@@ -1,4 +1,7 @@
 <!-- Keep this short. The review checklist is docs/standards/review-checklist.md. -->
+## Spec
+Spec ID: <spec_id>
+
 ## What & why
 <!-- What changed, and the problem it solves. Link the plan/handoff if relevant. -->
 

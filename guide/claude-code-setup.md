@@ -45,6 +45,20 @@ Subagents can be given limited tool sets with `tools` or `disallowedTools`. Thes
 - Configure tool allow/deny rules and project hooks in `.claude/settings.json` (personal settings in `.claude/settings.local.json`); a hook can also be scoped to one agent in that subagent's frontmatter (`hooks:` in `.claude/agents/<name>.md`) — the starter puts its worker shell guard there.
 - Use hooks when a required action must run at a defined tool/lifecycle event. `CLAUDE.md` and subagent prompts guide behavior but are not hard enforcement.
 
+### Separate idea discussion from formal specs
+
+For a spec-gated project, keep an exploratory command (for example `/vibe`) separate from typed formalizers
+such as `/feature`, `/enhancement`, `/bugfix`, `/infra`, and `/research`. The discussion command must not
+write a spec or select merge authority. Each formalizer can call the same `spec-base` skill, ask the owner to
+choose `approval_mode: human | judge`, then add type-specific questions before writing the canonical spec.
+TagWell uses mirrored command and skill names in `.claude/commands/` and `.claude/skills/`; treat the shared
+interview as the contract and keep the two CLI wrappers in parity.
+
+The project entry instructions should require the trusted-spec preflight before any spec-governed
+implementation wave or worker dispatch. A command prompt alone does not enforce that gate. See
+[spec authoring and wave gates](spec-authoring-and-wave-gates.md) and
+[approval authority](approval-authority.md) for the portable contract.
+
 Keep these files concise and non-contradictory. A delegation-first instruction can improve routing reliability, but it cannot guarantee that Claude Code will delegate; monitor whether the orchestrator actually dispatches workers and refine the description or project guidance when it repeatedly fails to do so.
 
 ## Session recovery

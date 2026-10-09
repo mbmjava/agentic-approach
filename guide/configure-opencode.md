@@ -37,6 +37,19 @@ Use a separate implementation worker only when it has a clear assignment protoco
 
 For example, a handoff skill can enforce a checklist, while a `/review` command can provide a repeatable review prompt. Keep source instructions in `AGENTS.md`; V2's `instructions` config field is not currently loaded as an instruction source.
 
+### Separate idea discussion from formal specs
+
+For a spec-gated project, keep an exploratory command (for example `/vibe`) separate from typed formalizers
+such as `/feature`, `/enhancement`, `/bugfix`, `/infra`, and `/research`. The discussion command must not
+write a spec or select merge authority. Each formalizer can call the same `spec-base` skill, ask the owner to
+choose `approval_mode: human | judge`, then add type-specific questions before writing the canonical spec.
+TagWell uses this pattern; its commands are wrappers around skills, not independent policies.
+
+Put the post-approval wave preflight in project guidance and a bounded script—not only in a prompt. A slash
+command can remind the orchestrator to run preflight, but the script must verify the approved spec against a
+trusted ref. See [spec authoring and wave gates](spec-authoring-and-wave-gates.md) and
+[approval authority](approval-authority.md) for the portable contract.
+
 ## Apply least privilege deliberately
 
 OpenCode permissions use ordered rules with `allow`, `ask`, and `deny`; the last matching rule wins. Use agent-level permissions to narrow a worker's tools and resources. For example, a reviewer should not be able to edit, while an implementation worker may have only the shell commands needed for bounded tests.

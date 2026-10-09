@@ -15,11 +15,18 @@ from is a separate reference:
 2. [`working-docs/agent-standards.md`](working-docs/agent-standards.md) — how agents work here.
 3. [`docs/standards/documentation.md`](docs/standards/documentation.md) — doc layout and lifecycle.
 4. [`working-docs/handoff.md`](working-docs/handoff.md) — current state (starts as a template).
+5. The active approved requirement and its `## Plan` / `## Waves`, when starting a spec-governed implementation wave.
 
 ## Operating loop
 
 - **Route before you implement.** Before substantial work, state
   `route: delegate ⟨slice⟩ | inline because ⟨reason⟩`.
+- **Spec-time approval, then preflight.** Formalize implementation work with a typed spec command; the
+  authorized owner chooses `approval_mode: human | judge` while creating the canonical requirement. Before
+  implementation or worker dispatch for waves begun after this gate is merged to the trusted rollup branch,
+  run `node scripts/agentic/preflight.mjs --spec-id <spec_id>`. It validates the existing decision; it must
+  not choose or re-prompt for authority at wave time. The one-time bootstrap change that introduces this gate
+  is human-authorized and reviewed; it cannot use a preflight that does not yet exist on the trusted ref.
 - **Delegate whenever a bounded slice can be safely delegated.** The user is never the trigger; do not
   wait to be reminded. Keep product judgment and integration with the orchestrator.
 - **Work an ordered queue** (the `Next` list in the handoff/plan) and continue until a stop condition:

@@ -31,6 +31,12 @@ The orchestrator remains responsible in every mode. It may recommend a mode and 
 
 For an explicitly exploratory request, brainstorm or prototype without pretending that a sketch is production-ready. For a clear implementation request, do not turn every ordinary coding choice into a permission question or require magic approval phrases for obvious, low-risk steps. Ask before crossing meaningful risk or authorization boundaries.
 
+When a project uses spec-gated implementation, keep **discussion**, **spec authoring**, and **execution** distinct:
+explore first without creating an artifact; when the owner is ready to formalize, choose the work type and its
+approval authority in the canonical spec; then validate that approved spec before starting its implementation
+wave. The wave gate validates the earlier decision—it does not ask the worker or judge to choose authority again.
+See [spec authoring and wave gates](spec-authoring-and-wave-gates.md).
+
 ## Spend effort where it buys confidence
 
 - Keep the primary agent as the user's single point of coordination and judgment. It should not spend expensive context doing routine file production when a lower-cost worker can do it to the required quality.
@@ -50,12 +56,16 @@ For an explicitly exploratory request, brainstorm or prototype without pretendin
 A small set of skills pays for itself across projects. Add others only when a procedure repeats:
 
 - **Handoff prep** — the checklist that closes a workstream and produces the [handoff template](templates.md).
-- **Spec / PRD generation** — turn a request into a reviewable requirement doc on demand.
+- **Spec authoring** — keep exploratory discussion separate from typed, owner-approved requirements. Use a
+  shared base interview for stable identity, scope, acceptance, risks, dependencies, and the spec-time approval
+  choice; use focused follow-up questions for each work type.
 - **Assignment / delegation** — the [worker assignment template](delegate-safely.md) as a reusable skill.
 - **Visual inspection** — delegate screenshots and images to a vision step; never claim to have seen them.
 - **Evaluation run** — drive the [evaluation harness](templates.md) for a non-deterministic feature.
 
-Keep each skill focused on one responsibility and short; a mega-skill is an [anti-pattern](anti-patterns.md). The starter ships four of these — `generate-prd` (spec/PRD), `prep-handoff`, `vision` (visual inspection), and `worker` (assignment/delegation).
+Keep each skill focused on one responsibility and short; a mega-skill is an [anti-pattern](anti-patterns.md).
+The starter provides a discussion mode, typed spec formalizers, `prep-handoff`, `vision` (visual inspection),
+and `worker` (assignment/delegation); see its `app/.opencode/` and `app/.claude/` adapters.
 
 ### Minimize wasted context
 

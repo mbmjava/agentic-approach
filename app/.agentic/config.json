@@ -4,17 +4,13 @@
     "repo": "OWNER/REPO"
   },
   "rollupBranch": "main",
-  "approval": {
-    "default": "model"
-  },
   "merge": {
     "method": "squash"
   },
   "labels": {
-    "model": "approve:model",
-    "human": "approve:human",
     "hold": "approve:hold"
   },
+  "judgeMergeTargets": [],
   "riskPaths": [
     "**/security/**",
     "**/tenancy/**",

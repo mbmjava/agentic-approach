@@ -19,7 +19,7 @@ For what this document is, where it comes from, and how to use it, see [What thi
 
 ## How to read this guide
 
-- **New to agentic coding:** read the [template](agentic-coding-template.md), then [roles](agentic-workflow.md), then [safe delegation](delegate-safely.md).
+- **New to agentic coding:** read the [template](agentic-coding-template.md), then [spec authoring and wave gates](spec-authoring-and-wave-gates.md), [roles](agentic-workflow.md), and [safe delegation](delegate-safely.md).
 - **Setting up a project:** the [bootstrap checklist](bootstrap-checklist.md), the [working agreement](working-agreement.md), and the [template](agentic-coding-template.md), plus the [OpenCode](configure-opencode.md) or [Claude Code](claude-code-setup.md) adapter.
 - **Improving an existing setup:** [adopt or refactor](adopt-or-refactor.md), then the [LLM prompts](llm-setup-and-refactor.md).
 - **Making rules stick or keeping the repo clean:** [enforcement and cleanup](enforcement-and-cleanup.md).
@@ -77,3 +77,4 @@ The role, collaboration, cost, verification, and recovery principles are tool-ne
 - 2026-10-05 — Independent per-slice review for delegated work, and a stack-migration cadence (coverage → tooling → contract-first typing, tighten config last; track progress as a ratio).
 - 2026-10-04 — Enforcement: run static analysis report-first, then gate only the rules with a real hit rate.
 - 2026-10-07 — Retired n8n: the orchestrator (agent session) plus the forge-neutral approval spine is the single control plane (policy, fail-closed decision, reviewer + judge).
+- 2026-10-08 — Added spec-time approval mode, discussion-vs-formalizer commands, and a trusted preflight; clarified Tagwell's judge is orchestrator-launched and not yet a provider-required status.

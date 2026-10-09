@@ -47,6 +47,7 @@ export function createGitHubForge({ repo, token, allowMutations = false, apiBase
         baseRef: pull.base.ref,
         author: pull.user?.login ?? null,
         draft: pull.draft === true,
+        description: pull.body ?? '',
         changedFiles: files.map((f) => f.filename),
         labels: (pull.labels ?? []).map((l) => l.name),
       };
@@ -54,7 +55,8 @@ export function createGitHubForge({ repo, token, allowMutations = false, apiBase
     async getChecks(headSha) {
       const runs = await getAllPages(
         `/repos/${owner}/${name}/commits/${headSha}/check-runs`, (d) => d.check_runs ?? []);
-      const passing = ['success', 'neutral', 'skipped'];
+      // A skipped required check is not evidence that the required work ran; fail closed.
+      const passing = ['success', 'neutral'];
       let state = 'pending';
       if (runs.length > 0 && runs.every((r) => r.status === 'completed')) {
         state = runs.every((r) => passing.includes(r.conclusion)) ? 'pass' : 'fail';

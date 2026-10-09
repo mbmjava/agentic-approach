@@ -12,6 +12,9 @@ tags: [plan]
 Status: ACTIVE · Owner: <name> · Created: YYYY-MM-DD
 Scope: <one sentence: what this workstream delivers>
 
+Use this file for a **cross-cutting workstream spanning multiple specs**. A single requirement keeps its
+implementation plan and wave log in the requirement's `## Plan` and `## Waves` sections.
+
 ## Current state / next decision
 - Latest outcome + evidence relevant to the next step: <result and proof>
 - Unresolved decision or blocker: <decision/blocker, or none>

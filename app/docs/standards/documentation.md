@@ -3,7 +3,7 @@ title: Documentation process
 type: standard
 status: active
 owner: mbmjava
-last_updated: 2026-09-30
+last_updated: 2026-10-08
 tags: [process, docs, onboarding]
 ---
 
@@ -106,13 +106,16 @@ Copy from `docs/standards/templates/`:
 | `requirement.md` | a PRD/spec (`docs/requirements/`) |
 | `runbook.md` | an operational procedure (`docs/runbooks/`) |
 
-Two skills encode these: `prep-handoff` (prepare the one canonical per-wave handoff) and
-`generate-prd` (write a requirements doc) — `.opencode/skills/`.
+Skills encode these procedures: `prep-handoff` plus a shared `spec-base` interview and typed formalizers
+(`feature`, `enhancement`, `bugfix`, `infra`, `research`), mirrored in `.opencode/skills/` and
+`.claude/skills/`.
 
 ## 8. What to write when (decision tree)
 
 - Made an **irreversible / precedent-setting choice** → ADR.
-- Building a **multi-step workstream** → a plan in `working-docs/plans/`.
+- Building a **unit of intent** → one requirement in `docs/requirements/` with `## Plan` and `## Waves`;
+  its owner selects `approval_mode` during spec creation.
+- Coordinating a **cross-cutting workstream spanning multiple specs** → a plan in `working-docs/plans/`.
 - **Ending a workstream** (milestone, hour mark, first stall) → refresh its handoff.
 - Changed **behavior/contracts** → update the matching durable doc in the same commit.
 - Explaining the **system** to a newcomer → `docs/architecture/` or `docs/onboarding/`.

@@ -1,70 +1,81 @@
-# Approval authority (who approves a change)
+# Approval authority (who may approve a change)
 
-[Independent review](independent-review.md) gives you a *reviewer*. This topic adds the two things that
-turn review into **trusted approval**: a **policy** for who may approve a change, and a **fail-closed
-decision** that merges only when everything agrees. Keep both **forge- and harness-neutral** so the same
-rules work on GitHub or GitLab, driven by an agent or a human.
+[Independent review](independent-review.md) gives you a reviewer. A separate **judge** can decide whether
+the reviewed change satisfies its acceptance criteria and is safe to approve. Neither role should decide its
+own authority. Set that authority deliberately, before implementation begins.
 
-## The policy: approval authority
+## Set the mode when the requirement is created
 
-Who approves should be a rule, not a judgement call in the moment. Express it as one policy with a fixed
-precedence, resolving every change to a single **authority**:
+For a spec-driven project, put one explicit `approval_mode: human | judge` in the canonical requirement.
+The authorized owner chooses it during spec authoring—not later from a PR label, branch name, or agent
+suggestion. A discussion/prototype can happen first without creating a spec or selecting merge authority.
 
-1. **Hold** — an explicit hold beats everything → human.
-2. **Risk path** — a change touching a protected area → human.
-3. **Explicit label** — a “human” label beats a “model” label when both are present.
-4. **Default** — start at **model**.
+| Spec mode | Meaning | Merge behavior |
+| --- | --- | --- |
+| `human` | The change needs human approval. | The judge may advise, but automation does not merge. |
+| `judge` | The owner has authorized the judge path for this spec. | Merge is eligible only after the required checks pass and the independent judge approves. |
 
-Risk paths are the point of the policy: security, tenancy, schema/migration, CI workflows, and **the loop’s
-own files** (the harness, the policy, the standards). A change that touches any of them is **human**, whatever
-label it carries — so the loop can never widen its own authority. Keep the labels **neutral** and remap them
-per forge (e.g. GitLab scoped labels), so the policy never names a provider.
+The spec ID and mode travel together into the plan and PR/MR. Before an implementation wave, a preflight
+checks that the approved spec exists and has a valid mode. At review time, resolve that same spec ID from a
+**trusted, reviewed ref**, not from unreviewed PR text, labels, or the source-branch copy. Missing or
+unverifiable authority fails closed; do not silently fall back to a model default.
 
-Concrete paths, labels, and the config file are the starter’s concern; see the
-[approval loop runbook](../app/docs/runbooks/approval-loop.md).
+Once a spec is approved, do not treat its mode as a per-wave toggle. If the owner needs to change it, use an
+explicit, reviewed spec amendment and define which in-flight changes it affects. That amendment path and its
+effect on open PRs must be clear in the target project.
 
-## The decision: fail closed
+Some projects add a manual `hold` or risk-path override that forces the human path. Keep such overrides
+explicit and higher priority than `judge`; do not let labels grant judge authority. A single-owner project may
+choose a simpler policy, but it should state that choice rather than imply that paths are protected when they
+are not.
 
-A single pure decision from three inputs — **authority**, **CI state**, and the **judge verdict**:
+## Separate the verdict from the authority
+
+The reviewer finds concrete defects; the **separate, read-only judge** rechecks the diff, acceptance criteria,
+reviewer findings, and reported CI state. The judge returns `approve`, `request-changes`, or `escalate`; it
+does not edit or merge. The orchestrator supplies that verdict to a deterministic decision/merge actuator.
+
+For a judge-authorized merge, require all of the following:
 
 ```
-merge   only when  authority = model  AND  ci = pass  AND  judge = approve
-human   when authority = human
-escalate otherwise (non-approve judge, non-green CI, missing/invalid input)
+approved spec mode = judge
+AND required CI = pass
+AND independent judge = approve
+AND target branch is eligible
+AND current PR/MR head = the exact judged head SHA
 ```
 
-Two guards make it safe to run for real:
+Any missing input, failed/pending check, non-approve verdict, moved head, or disallowed target blocks the
+automated path. A human-authorized spec stays human even if the judge approves.
 
-- **Bind the merge to the judged revision** — pass the reviewed head SHA through, and refuse if the head
-  moved, so a push between review and merge cannot ship an unjudged revision.
-- **Check the target branch** — merging into the wrong base is silently destructive; assert the base.
+## The provider must enforce the gate
 
-The merge is an **actuator**, not the gate. Prefer making the **provider** the gate (branch protection /
-required checks, including the judge status) so a change *cannot* merge without them — see the
-[enforcement ladder](enforcement-and-cleanup.md). The loop then merges only when it is additionally allowed to.
+The actuator is not the merge gate. GitHub branch protection/rulesets or GitLab protected-branch and merge
+rules must require the relevant CI and judge statuses. Otherwise a person with merge permission can use the
+provider UI to merge before a manually launched judge responds. The actuator should independently validate
+the same conditions, bind to the reviewed SHA and target, default to dry-run, and never bypass provider
+protections. Provider status semantics differ; map them explicitly and fail closed on unknown or unexpectedly
+skipped checks.
 
-## Two roles, not one
+Before making an AI judge a required status, validate it on real, correctly labeled PR/MR outcomes. Track
+false approvals separately from false rejections, and expand authority only when the project accepts the
+measured risk. Calibration is a project policy decision—not evidence that a judge check is wired into CI.
 
-The reviewer **finds** problems; the **judge** decides, adversarially, whether the change is safe to
-approve — re-reading the risky parts, refuting false positives with cited rationale, and confirming the
-acceptance criteria. They are separate read-only roles with separate outputs, so a single model’s optimism
-cannot both write and bless a change. A human can take either seat later behind the same contract.
+## TagWell as an implementation example
 
-## Calibrate before you trust it
+TagWell's current flow formalizes work with `/vibe` for discussion and typed commands such as `/feature`,
+`/enhancement`, `/bugfix`, `/infra`, and `/research`. The shared `spec-base` interview asks the owner for
+`approval_mode` when the spec is created. `preflight.mjs` checks the approved spec on trusted `origin/develop`
+before a new implementation wave; the PR/MR carries one `Spec ID:` reference.
 
-An advisory judge becomes a gate only after it has been measured on **real, correctly-labelled PR heads** —
-not a hand-written synthetic corpus, which can read perfectly and miss real defects:
+The OpenCode/Claude `judge` is a read-only subagent that the orchestrator launches after the reviewer and CI
+results are available. `apply.mjs` resolves the trusted spec mode and runs dry by default; `--allow-merge`
+invokes the forge actuator only for `judge + CI pass + judge approve` and a guarded head SHA. The exported n8n
+judge/reviewer workflows are currently parked, and GitHub branch protection requires CI checks but not a
+judge status. Therefore TagWell has a **judge-capable orchestrated path**, but not a provider-enforced,
+automatic judge gate: an authorized person could still merge through GitHub before the judge runs. The
+GitLab adapter is also a stub. See the [approval-loop runbook](../app/docs/runbooks/approval-loop.md) for
+current commands and limits.
 
-- Label each case with the verdict the review record **actually required at that head**, and record the
-  policy’s resolved authority.
-- The headline metric is **`falseApproveRate`** — approving a change that should not merge (the dangerous
-  error). Also watch false rejects.
-- **Score only `authority = model` cases.** For human-gated changes the loop never consults the judge.
-- Widen automation only when `falseApproveRate = 0` on that real corpus.
-
-## Where to start
-
-This topic is the **concept**; the **code** lives in the starter. It ships a small, dependency-free
-reference implementation — the policy, the resolver, the fail-closed decision, the actuator, a forge port,
-and a calibration scorer — plus the `pr-reviewer` and `judge` roles and the operational
-[approval loop runbook](../app/docs/runbooks/approval-loop.md).
+This is evidence from one single-owner project, not a universal policy. Keep the shared contract portable;
+put CLI command syntax and provider wiring in the corresponding adapter and starter.

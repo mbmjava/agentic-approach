@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { globToRegExp, resolveAuthority } from './authority.mjs';
 
 const config = {
-  approval: { default: 'model' },
-  labels: { model: 'approve:model', human: 'approve:human', hold: 'approve:hold' },
+  labels: { hold: 'approve:hold' },
   riskPaths: ['**/security/**', '**/pom.xml', '.github/workflows/**'],
+  rollupBranch: 'main',
+  judgeMergeTargets: ['rc/**'],
 };
 
 test('glob: ** spans directories, * does not', () => {
@@ -18,30 +19,55 @@ test('glob: ** spans directories, * does not', () => {
   assert.equal(globToRegExp('.github/workflows/**').test('.github/ci.yml'), false);
 });
 
-test('defaults to model when nothing overrides', () => {
-  assert.deepEqual(resolveAuthority({ config, labels: [], changedFiles: ['src/a.ts'] }),
-    { authority: 'model', reason: 'default' });
+test('the spec-time judge mode grants model authority only on an eligible RC target', () => {
+  assert.deepEqual(resolveAuthority({ config, approvalMode: 'judge', baseRef: 'rc/v1.2-feature-a' }),
+    { authority: 'model', reason: 'spec-mode:judge' });
 });
 
-test('hold forces human above all', () => {
-  const r = resolveAuthority({ config, labels: ['approve:model', 'approve:hold'], changedFiles: ['src/a.ts'] });
-  assert.equal(r.authority, 'human');
-  assert.equal(r.reason, 'hold');
+test('human spec mode never grants model authority', () => {
+  assert.deepEqual(resolveAuthority({ config, approvalMode: 'human', baseRef: 'rc/v1.2-feature-a' }),
+    { authority: 'human', reason: 'spec-mode:human' });
 });
 
-test('a risk path forces human even with a model label', () => {
-  const r = resolveAuthority({ config, labels: ['approve:model'],
+test('missing or unverifiable spec mode fails closed to human', () => {
+  assert.deepEqual(resolveAuthority({ config, baseRef: 'rc/v1.2-feature-a' }),
+    { authority: 'human', reason: 'spec-mode:missing' });
+  assert.deepEqual(resolveAuthority({ config, specError: 'trusted ref unavailable' }),
+    { authority: 'human', reason: 'spec-mode:unverified' });
+  assert.deepEqual(resolveAuthority({ config, approvalMode: 'model', baseRef: 'rc/v1.2-feature-a' }),
+    { authority: 'human', reason: 'spec-mode:invalid' });
+});
+
+test('missing target cannot report judge authority', () => {
+  assert.deepEqual(resolveAuthority({ config, approvalMode: 'judge' }),
+    { authority: 'human', reason: 'target:missing' });
+});
+
+test('hold forces human above the spec mode', () => {
+  assert.deepEqual(resolveAuthority({ config, labels: ['approve:hold'], approvalMode: 'judge',
+    baseRef: 'rc/v1.2-feature-a' }), { authority: 'human', reason: 'hold' });
+});
+
+test('a configured risk path forces human even with judge mode', () => {
+  const result = resolveAuthority({ config, approvalMode: 'judge', baseRef: 'rc/v1.2-feature-a',
     changedFiles: ['tagwell-app/src/main/java/x/security/Y.java'] });
-  assert.equal(r.authority, 'human');
-  assert.match(r.reason, /^risk-path:/);
+  assert.equal(result.authority, 'human');
+  assert.match(result.reason, /^risk-path:/);
 });
 
-test('human label beats a model label on the same PR', () => {
-  const r = resolveAuthority({ config, labels: ['approve:model', 'approve:human'], changedFiles: ['src/a.ts'] });
-  assert.deepEqual(r, { authority: 'human', reason: 'label:human' });
+test('main is human-only even when the spec says judge', () => {
+  assert.deepEqual(resolveAuthority({ config, approvalMode: 'judge', baseRef: 'main' }),
+    { authority: 'human', reason: 'target:human-only' });
 });
 
-test('a model label selects model when no risk or hold applies', () => {
-  const r = resolveAuthority({ config, labels: ['approve:model'], changedFiles: ['src/a.ts'] });
-  assert.deepEqual(r, { authority: 'model', reason: 'label:model' });
+test('an unlisted non-main target is human-only', () => {
+  assert.deepEqual(resolveAuthority({ config, approvalMode: 'judge', baseRef: 'develop' }),
+    { authority: 'human', reason: 'target:not-judge-eligible' });
+});
+
+test('approval labels cannot grant or revoke judge authority; hold remains the only label override', () => {
+  assert.deepEqual(resolveAuthority({ config, labels: ['approve:human'], approvalMode: 'judge',
+    baseRef: 'rc/v1.2-feature-a' }), { authority: 'model', reason: 'spec-mode:judge' });
+  assert.deepEqual(resolveAuthority({ config, labels: ['approve:model'], baseRef: 'rc/v1.2-feature-a' }),
+    { authority: 'human', reason: 'spec-mode:missing' });
 });

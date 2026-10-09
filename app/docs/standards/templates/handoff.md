@@ -15,7 +15,8 @@ Branch: `<branch>` · Working tree: <clean | uncommitted: list>
 
 ## Read first
 1. `AGENTS.md` → `working-docs/agent-standards.md`
-2. the live plan: `working-docs/plans/<name>.md`
+2. the active approved requirement's `## Plan` / `## Waves`, or the cross-cutting plan
+   `working-docs/plans/<name>.md`
 3. this handoff
 
 ## Verified green

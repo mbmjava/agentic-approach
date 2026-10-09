@@ -12,6 +12,7 @@ path in the [playbook](playbook.md). This page is the full topic index.
 - [What this is](what-this-is.md) — purpose, source, and how to use the guide.
 - [Playbook](playbook.md) — the reading path, central idea, principles, and change log.
 - [Agentic-coding template](agentic-coding-template.md) — pick the lightest workflow that fits.
+- [Spec authoring and wave gates](spec-authoring-and-wave-gates.md) — separate discussion, spec-time authority, and implementation preflight.
 - [Token economics](token-economics.md) — estimate cost before you spend it.
 - [Anti-patterns](anti-patterns.md) — failure modes to avoid.
 
